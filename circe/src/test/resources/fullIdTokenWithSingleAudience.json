@@ -1,0 +1,16 @@
+{
+  "sub": "alice",
+  "iss": "https://openid.c2id.com",
+  "aud": "client-12345",
+  "nonce": "n-0S6_WzA2Mj",
+  "auth_time": 1311280969,
+  "acr": "c2id.loa.hisec",
+  "iat": 1311280970,
+  "exp": 1311281970,
+  "amr": [
+    "pwd",
+    "rsa",
+    "mfa"
+  ],
+  "azp": "client-00001"
+}

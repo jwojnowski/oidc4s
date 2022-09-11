@@ -1,0 +1,10 @@
+{
+  "sub": "alice",
+  "iss": "https://openid.c2id.com",
+  "aud": [
+    "client-12345",
+    "client-54321"
+  ],
+  "iat": 1311280970,
+  "exp": 1311281970
+}
