@@ -3,7 +3,6 @@ package me.wojnowski.oidc4s
 import cats.effect.IO
 import cats.effect.testkit.TestControl
 import cats.syntax.all._
-import me.wojnowski.oidc4s.cache.Cache
 import munit.CatsEffectSuite
 
 import scala.concurrent.duration.DurationInt

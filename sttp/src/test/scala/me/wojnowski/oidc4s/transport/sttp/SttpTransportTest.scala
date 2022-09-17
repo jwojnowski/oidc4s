@@ -1,9 +1,9 @@
-package me.wojnowski.oidc4s.sttp
+package me.wojnowski.oidc4s.transport.sttp
 
-import me.wojnowski.oidc4s.HttpTransport
-import me.wojnowski.oidc4s.HttpTransport.Error.InvalidUrl
-import me.wojnowski.oidc4s.HttpTransport.Error.UnexpectedError
-import me.wojnowski.oidc4s.HttpTransport.Error.UnexpectedResponse
+import me.wojnowski.oidc4s.transport.Transport.Error.InvalidUrl
+import me.wojnowski.oidc4s.transport.Transport.Error.UnexpectedError
+import me.wojnowski.oidc4s.transport.Transport.Error.UnexpectedResponse
+import me.wojnowski.oidc4s.transport.Transport
 import munit.FunSuite
 import sttp.client3.Response
 import sttp.client3.TryHttpURLConnectionBackend
@@ -70,7 +70,7 @@ class SttpTransportTest extends FunSuite {
 
     val result = transport.get(correctUrl)
 
-    assertEquals(result, expected = Success(Right(HttpTransport.Response("data", expiresIn = None))))
+    assertEquals(result, expected = Success(Right(Transport.Response("data", expiresIn = None))))
   }
 
   test("Correct response (invalid cache headers)") {
@@ -83,7 +83,7 @@ class SttpTransportTest extends FunSuite {
 
     val result = transport.get(correctUrl)
 
-    assertEquals(result, expected = Success(Right(HttpTransport.Response("data", expiresIn = None))))
+    assertEquals(result, expected = Success(Right(Transport.Response("data", expiresIn = None))))
   }
 
   test("Correct response (valid cache headers, no age)") {
@@ -103,7 +103,7 @@ class SttpTransportTest extends FunSuite {
 
     val result = transport.get(correctUrl)
 
-    assertEquals(result, expected = Success(Right(HttpTransport.Response("data", expiresIn = Some(FiniteDuration(1, "day"))))))
+    assertEquals(result, expected = Success(Right(Transport.Response("data", expiresIn = Some(FiniteDuration(1, "day"))))))
   }
 
   test("Correct response (valid cache headers, age present)") {
@@ -126,7 +126,7 @@ class SttpTransportTest extends FunSuite {
 
     val result = transport.get(correctUrl)
 
-    assertEquals(result, expected = Success(Right(HttpTransport.Response("data", expiresIn = Some(FiniteDuration(23, "hours"))))))
+    assertEquals(result, expected = Success(Right(Transport.Response("data", expiresIn = Some(FiniteDuration(23, "hours"))))))
   }
 
 }

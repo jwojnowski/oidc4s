@@ -15,6 +15,9 @@ import scala.util.Try
 import cats.syntax.all._
 import me.wojnowski.oidc4s.IdTokenVerifier.Error.CouldNotExtractKeyId
 import me.wojnowski.oidc4s.IdTokenVerifier.Error.JwtVerificationError
+import me.wojnowski.oidc4s.config.OpenIdConnectDiscovery
+import me.wojnowski.oidc4s.json.JsonDecoder
+import me.wojnowski.oidc4s.json.JsonSupport
 import pdi.jwt.Jwt
 import pdi.jwt.JwtHeader
 

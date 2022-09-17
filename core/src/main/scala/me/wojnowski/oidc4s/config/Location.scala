@@ -1,7 +1,8 @@
-package me.wojnowski.oidc4s
+package me.wojnowski.oidc4s.config
 
 import cats.syntax.all._
-import me.wojnowski.oidc4s.Location.Error.InvalidLocation
+import me.wojnowski.oidc4s.ProductSerializableNoStackTrace
+import me.wojnowski.oidc4s.config.Location.Error.InvalidLocation
 
 abstract sealed case class Location(url: String)
 

@@ -1,10 +1,9 @@
-package me.wojnowski.oidc4s.circe
+package me.wojnowski.oidc4s.json.circe
 
 import me.wojnowski.oidc4s.PublicKeyProvider.JsonWebKey
 import me.wojnowski.oidc4s.PublicKeyProvider.JsonWebKeySet
+import me.wojnowski.oids4s.json.circe.CirceJsonSupport
 import munit.FunSuite
-
-import scala.io.Source
 
 class JwksCirceJsonSupportTest extends FunSuite {
   test("JsonWebKeySet decoding") {

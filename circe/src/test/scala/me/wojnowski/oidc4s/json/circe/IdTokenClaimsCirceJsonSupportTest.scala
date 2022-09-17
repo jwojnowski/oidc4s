@@ -1,4 +1,4 @@
-package me.wojnowski.oidc4s.circe
+package me.wojnowski.oidc4s.json.circe
 
 import me.wojnowski.oidc4s.Audience
 import me.wojnowski.oidc4s.AuthenticationContextClassReference
@@ -8,6 +8,7 @@ import me.wojnowski.oidc4s.IdTokenClaims
 import me.wojnowski.oidc4s.Issuer
 import me.wojnowski.oidc4s.Nonce
 import me.wojnowski.oidc4s.Subject
+import me.wojnowski.oids4s.json.circe.CirceJsonSupport
 import munit.FunSuite
 
 import java.time.Instant

@@ -11,6 +11,12 @@ import me.wojnowski.oidc4s.IdTokenVerifierTest.staticKeyProvider
 import me.wojnowski.oidc4s.PublicKeyProvider.KeyId
 import me.wojnowski.oidc4s.PublicKeyProvider.KeyMap
 import me.wojnowski.oidc4s.TimeUtils.InstantToFiniteDuration
+import me.wojnowski.oidc4s.config.Location
+import me.wojnowski.oidc4s.config.OpenIdConfig
+import me.wojnowski.oidc4s.config.OpenIdConnectDiscovery
+import me.wojnowski.oidc4s.mocks.CacheMock
+import me.wojnowski.oidc4s.mocks.HttpTransportMock
+import me.wojnowski.oidc4s.mocks.JsonSupportMock
 import munit.CatsEffectSuite
 import pdi.jwt.JwtHeader
 import pdi.jwt.exceptions.JwtEmptyAlgorithmException
@@ -111,7 +117,7 @@ class IdTokenVerifierTest extends CatsEffectSuite {
       "eyJhbGciOiJSUzI1NiIsImtpZCI6IjExZTAzZjM5YjhkMzAwYzhjOWExYjgwMGRkZWJmY2ZkZTQxNTJjMGMiLCJ0eXAiOiJKV1QifQ.eyJhdWQiOiJodHRwczovL2V4YW1wbGUuY29tL3BhdGgiLCJhenAiOiJpbnRlZ3JhdGlvbi10ZXN0c0BjaGluZ29yLXRlc3QuaWFtLmdzZXJ2aWNlYWNjb3VudC5jb20iLCJlbWFpbCI6ImludGVncmF0aW9uLXRlc3RzQGNoaW5nb3ItdGVzdC5pYW0uZ3NlcnZpY2VhY2NvdW50LmNvbSIsImVtYWlsX3ZlcmlmaWVkIjp0cnVlLCJleHAiOjE1ODc2Mjk4ODgsImlhdCI6MTU4NzYyNjI4OCwiaXNzIjoiaHR0cHM6Ly90aGlzaXNub3Rnb29nbGUuY29tIiwic3ViIjoiMTA0MDI5MjkyODUzMDk5OTc4MjkzIn0.g_FcdLByRX9STZaIWj9OGPZu-t6OtJUtw3h-7KjxHeVoGD7DBvy0qcRrS66ieVDowRcuvAWgBvdd6FNH8uHUiFYzx2But5abVQgZEZfUQLamWXnPH_Y-HdieC7vq3HxeKtBpBAFKt_LNSsw3xoA5sT_CJPsK-JG-GeO6BpY3cEbaNt0p7bRpe3YdaL7m86p045r9WwkXRcHbzF2OEHM2GR1zguYIXEax_VUPFTEV0V2xE04yxiQ0TbcXsxz3jC_SDoJVK0uchtGHl8vtxaS3JHEJuUr10OquwoR3-uDamMjlQyxdz3EIBqq9Z6zUXY9cJKIvaWSNO4BeNzZBxc8vEA"
 
     val discoveryWithDifferentIssuer =
-      OpenIdConnectDiscovery.static[IO](OpenIdConfig(issuer = Issuer("https://thisisnotgoogle.com"), jwksUri = ""))
+      OpenIdConnectDiscovery.static[IO](config.OpenIdConfig(issuer = Issuer("https://thisisnotgoogle.com"), jwksUri = ""))
 
     runAtInstant(idTokenExpiration.minusSeconds(3)) {
       IdTokenVerifier
@@ -188,8 +194,8 @@ class IdTokenVerifierTest extends CatsEffectSuite {
       CacheMock
         .rotateData[IO, OpenIdConfig](
           NonEmptyVector.of(
-            OpenIdConfig(issuer = Issuer("A"), jwksUri = ""),
-            OpenIdConfig(issuer = Issuer("B"), jwksUri = "")
+            config.OpenIdConfig(issuer = Issuer("A"), jwksUri = ""),
+            config.OpenIdConfig(issuer = Issuer("B"), jwksUri = "")
           )
         )
         .flatMap { rotatingCache =>

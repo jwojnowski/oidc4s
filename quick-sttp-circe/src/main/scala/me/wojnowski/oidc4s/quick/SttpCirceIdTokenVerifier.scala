@@ -4,15 +4,15 @@ import cats.Monad
 import cats.effect.kernel.Clock
 import cats.effect.kernel.Sync
 import cats.syntax.all._
+import me.wojnowski.oidc4s.Cache
 import me.wojnowski.oidc4s.IdTokenVerifier
-import me.wojnowski.oidc4s.Location
-import me.wojnowski.oidc4s.OpenIdConfig
-import me.wojnowski.oidc4s.OpenIdConnectDiscovery
 import me.wojnowski.oidc4s.PublicKeyProvider
 import me.wojnowski.oidc4s.PublicKeyProvider.KeyMap
-import me.wojnowski.oidc4s.cache.Cache
-import me.wojnowski.oidc4s.circe.CirceJsonSupport
-import me.wojnowski.oidc4s.sttp.SttpTransport
+import me.wojnowski.oidc4s.config.Location
+import me.wojnowski.oidc4s.config.OpenIdConfig
+import me.wojnowski.oidc4s.config.OpenIdConnectDiscovery
+import me.wojnowski.oidc4s.transport.sttp.SttpTransport
+import me.wojnowski.oids4s.json.circe.CirceJsonSupport
 import sttp.client3.SttpBackend
 
 import scala.concurrent.duration.FiniteDuration

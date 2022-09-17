@@ -1,7 +1,8 @@
-package me.wojnowski.oidc4s.circe
+package me.wojnowski.oidc4s.json.circe
 
 import me.wojnowski.oidc4s.Issuer
-import me.wojnowski.oidc4s.OpenIdConfig
+import me.wojnowski.oidc4s.config
+import me.wojnowski.oids4s.json.circe.CirceJsonSupport
 import munit.FunSuite
 
 import scala.io.Source
@@ -15,7 +16,7 @@ class OpenIdConfigCirceJsonSupport extends FunSuite {
     assertEquals(
       result,
       expected = Right(
-        OpenIdConfig(
+        config.OpenIdConfig(
           issuer = Issuer("https://appleid.apple.com"),
           jwksUri = "https://appleid.apple.com/auth/keys"
         )

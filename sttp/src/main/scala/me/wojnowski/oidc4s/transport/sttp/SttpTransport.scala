@@ -1,8 +1,8 @@
-package me.wojnowski.oidc4s.sttp
+package me.wojnowski.oidc4s.transport.sttp
 
 import cats.syntax.all._
-import me.wojnowski.oidc4s.HttpTransport
-import me.wojnowski.oidc4s.HttpTransport.Error
+import me.wojnowski.oidc4s.transport.Transport.Error
+import me.wojnowski.oidc4s.transport.Transport
 import sttp.client3._
 import sttp.model.HeaderNames
 import sttp.model.headers.CacheDirective
@@ -17,10 +17,10 @@ import scala.util.control.NonFatal
 
 object SttpTransport {
 
-  def instance[F[_]](backend: SttpBackend[F, Any]): HttpTransport[F] = new HttpTransport[F] {
+  def instance[F[_]](backend: SttpBackend[F, Any]): Transport[F] = new Transport[F] {
     private implicit val monadError: MonadError[F] = backend.responseMonad
 
-    override def get(url: String): F[Either[HttpTransport.Error, HttpTransport.Response]] =
+    override def get(url: String): F[Either[Transport.Error, Transport.Response]] =
       Try(uri"$url").toEither match {
         case Right(uri) =>
           backend
@@ -51,7 +51,7 @@ object SttpTransport {
                       maxAge - maybeAge.getOrElse(Duration.Zero)
                     }
 
-                  HttpTransport.Response(data, expiresIn = maybeExpiresIn)
+                  Transport.Response(data, expiresIn = maybeExpiresIn)
                 }
                 .leftMap { errorResponse =>
                   Error.UnexpectedResponse(response.code.code, errorResponse.some)
@@ -59,11 +59,11 @@ object SttpTransport {
                 .leftWiden[Error]
             )
             .handleError { case NonFatal(throwable) =>
-              Error.UnexpectedError(throwable).asLeft[HttpTransport.Response].leftWiden[Error].unit
+              Error.UnexpectedError(throwable).asLeft[Transport.Response].leftWiden[Error].unit
             }
 
         case Left(_) =>
-          Error.InvalidUrl(url).asLeft[HttpTransport.Response].leftWiden[Error].unit
+          Error.InvalidUrl(url).asLeft[Transport.Response].leftWiden[Error].unit
 
       }
 

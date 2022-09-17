@@ -1,8 +1,8 @@
-package me.wojnowski.oidc4s.circe
+package me.wojnowski.oids4s.json.circe
 
 import io.circe.Decoder
 import me.wojnowski.oidc4s.Issuer
-import me.wojnowski.oidc4s.OpenIdConfig
+import me.wojnowski.oidc4s.config.OpenIdConfig
 
 trait OpenIdConfigurationCirceDecoder {
   private implicit val issuerDecoder: Decoder[Issuer] =

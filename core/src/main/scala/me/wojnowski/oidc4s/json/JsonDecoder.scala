@@ -1,4 +1,4 @@
-package me.wojnowski.oidc4s
+package me.wojnowski.oidc4s.json
 
 trait JsonDecoder[A] {
   def decode(raw: String): Either[String, A]

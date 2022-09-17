@@ -1,6 +1,10 @@
-package me.wojnowski.oidc4s
+package me.wojnowski.oidc4s.mocks
 
+import me.wojnowski.oidc4s.IdTokenClaims
 import me.wojnowski.oidc4s.PublicKeyProvider.JsonWebKeySet
+import me.wojnowski.oidc4s.config.OpenIdConfig
+import me.wojnowski.oidc4s.json.JsonDecoder
+import me.wojnowski.oidc4s.json.JsonSupport
 import pdi.jwt.JwtHeader
 
 object JsonSupportMock {

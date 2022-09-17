@@ -15,7 +15,13 @@ import java.security.PublicKey
 import java.security.spec.X509EncodedKeySpec
 import java.util.Base64
 import me.wojnowski.oidc4s.PublicKeyProviderTest.CountAndState
-import me.wojnowski.oidc4s.cache.Cache
+import me.wojnowski.oidc4s.config.Location
+import me.wojnowski.oidc4s.config.OpenIdConfig
+import me.wojnowski.oidc4s.config.OpenIdConnectDiscovery
+import me.wojnowski.oidc4s.mocks.CacheMock
+import me.wojnowski.oidc4s.mocks.HttpTransportMock
+import me.wojnowski.oidc4s.mocks.JsonSupportMock
+import me.wojnowski.oidc4s.transport.Transport
 import munit.CatsEffectSuite
 
 class PublicKeyProviderTest extends CatsEffectSuite {
@@ -96,13 +102,13 @@ class PublicKeyProviderTest extends CatsEffectSuite {
   }
 
   test("PublicKeyProvider uses discovery for every call") {
-    val ioTransport = HttpTransportMock.const[IO]("", "", uri => HttpTransport.Error.UnexpectedResponse(404, s"Expected $uri".some))
+    val ioTransport = HttpTransportMock.const[IO]("", "", uri => Transport.Error.UnexpectedResponse(404, s"Expected $uri".some))
 
     CacheMock
       .rotateData[IO, OpenIdConfig](
         NonEmptyVector.of(
-          OpenIdConfig(issuer = Issuer(""), jwksUri = "https://a"),
-          OpenIdConfig(issuer = Issuer(""), jwksUri = "https://b")
+          config.OpenIdConfig(issuer = Issuer(""), jwksUri = "https://a"),
+          config.OpenIdConfig(issuer = Issuer(""), jwksUri = "https://b")
         )
       )
       .flatMap { rotatingCache =>
@@ -129,14 +135,14 @@ class PublicKeyProviderTest extends CatsEffectSuite {
                   PublicKeyProvider
                     .Error
                     .CouldNotFetchKeys(
-                      HttpTransport.Error.UnexpectedResponse(404, s"Expected https://a".some)
+                      Transport.Error.UnexpectedResponse(404, s"Expected https://a".some)
                     )
                 ),
                 Left(
                   PublicKeyProvider
                     .Error
                     .CouldNotFetchKeys(
-                      HttpTransport.Error.UnexpectedResponse(404, s"Expected https://b".some)
+                      Transport.Error.UnexpectedResponse(404, s"Expected https://b".some)
                     )
                 )
               )

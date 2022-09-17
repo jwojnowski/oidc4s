@@ -14,7 +14,10 @@ import scala.util.Try
 import cats.syntax.all._
 import me.wojnowski.oidc4s.PublicKeyProvider.Error
 import me.wojnowski.oidc4s.PublicKeyProvider.Error.CouldNotDiscoverConfig
-import me.wojnowski.oidc4s.cache.Cache
+import me.wojnowski.oidc4s.config.OpenIdConnectDiscovery
+import me.wojnowski.oidc4s.json.JsonDecoder
+import me.wojnowski.oidc4s.json.JsonSupport
+import me.wojnowski.oidc4s.transport.Transport
 
 trait PublicKeyProvider[F[_]] {
   def getKey(keyId: KeyId): F[Either[PublicKeyProvider.Error, PublicKey]]
@@ -32,8 +35,8 @@ object PublicKeyProvider {
   def jwks[F[_]: Monad](
     discovery: OpenIdConnectDiscovery[F]
   )(
-    transport: HttpTransport[F],
-    jsonSupport: JsonSupport
+                         transport: Transport[F],
+                         jsonSupport: JsonSupport
   ): PublicKeyProvider[F] =
     new PublicKeyProvider[F] {
 
@@ -117,7 +120,7 @@ object PublicKeyProvider {
 
     case class CouldNotDecodeResponse(details: String) extends Error
 
-    case class CouldNotFetchKeys(cause: HttpTransport.Error) extends Error
+    case class CouldNotFetchKeys(cause: Transport.Error) extends Error
   }
 
 }

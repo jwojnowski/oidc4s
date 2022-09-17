@@ -1,4 +1,4 @@
-package me.wojnowski.oidc4s.cache
+package me.wojnowski.oidc4s
 
 import cats.Applicative
 import cats.Monad
@@ -6,7 +6,6 @@ import cats.effect.Clock
 import cats.effect.Ref
 import cats.effect.Sync
 import cats.syntax.all._
-import me.wojnowski.oidc4s.OpenIdConfig
 
 import java.time.Instant
 import java.util.concurrent.atomic.AtomicReference
@@ -79,5 +78,5 @@ object Cache {
 
     }
 
-  private[cache] case class Entry[A](value: A, expiresAt: Instant)
+  private case class Entry[A](value: A, expiresAt: Instant)
 }

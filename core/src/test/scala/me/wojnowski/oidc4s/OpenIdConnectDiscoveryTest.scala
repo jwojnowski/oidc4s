@@ -1,7 +1,11 @@
 package me.wojnowski.oidc4s
 
 import cats.Id
-import me.wojnowski.oidc4s.cache.Cache
+import me.wojnowski.oidc4s.config.Location
+import me.wojnowski.oidc4s.config.OpenIdConfig
+import me.wojnowski.oidc4s.config.OpenIdConnectDiscovery
+import me.wojnowski.oidc4s.mocks.HttpTransportMock
+import me.wojnowski.oidc4s.mocks.JsonSupportMock
 import munit.FunSuite
 
 class OpenIdConnectDiscoveryTest extends FunSuite {

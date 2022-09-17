@@ -1,16 +1,15 @@
-package me.wojnowski.oidc4s
+package me.wojnowski.oidc4s.transport
 
-import me.wojnowski.oidc4s.HttpTransport.Response
+import me.wojnowski.oidc4s.ProductSerializableNoStackTrace
+import me.wojnowski.oidc4s.transport.Transport.Response
 
-import java.time.Instant
-import scala.concurrent.duration.Duration
 import scala.concurrent.duration.FiniteDuration
 
-trait HttpTransport[F[_]] {
-  def get(uri: String): F[Either[HttpTransport.Error, Response]]
+trait Transport[F[_]] {
+  def get(uri: String): F[Either[Transport.Error, Response]]
 }
 
-object HttpTransport {
+object Transport {
   case class Response(data: String, expiresIn: Option[FiniteDuration])
 
   sealed trait Error extends ProductSerializableNoStackTrace
@@ -20,4 +19,5 @@ object HttpTransport {
     case class UnexpectedResponse(statusCode: Int, response: Option[String]) extends Error
     case class UnexpectedError(cause: Throwable) extends Error
   }
+
 }

@@ -1,11 +1,15 @@
-package me.wojnowski.oidc4s
+package me.wojnowski.oidc4s.config
 
 import cats.Monad
 import cats.data.EitherT
 import cats.syntax.all._
-import me.wojnowski.oidc4s.OpenIdConnectDiscovery.Error.CouldNotDecodeResponse
-import me.wojnowski.oidc4s.OpenIdConnectDiscovery.Error.CouldNotFetchResponse
-import me.wojnowski.oidc4s.cache.Cache
+import me.wojnowski.oidc4s.Cache
+import me.wojnowski.oidc4s.ProductSerializableNoStackTrace
+import me.wojnowski.oidc4s.config.OpenIdConnectDiscovery.Error.CouldNotDecodeResponse
+import me.wojnowski.oidc4s.config.OpenIdConnectDiscovery.Error.CouldNotFetchResponse
+import me.wojnowski.oidc4s.json.JsonDecoder
+import me.wojnowski.oidc4s.json.JsonSupport
+import me.wojnowski.oidc4s.transport.Transport
 
 trait OpenIdConnectDiscovery[F[_]] {
   def getConfig: F[Either[OpenIdConnectDiscovery.Error, OpenIdConfig]]
@@ -16,9 +20,9 @@ object OpenIdConnectDiscovery {
   def instance[F[_]: Monad](
     location: Location
   )(
-    httpTransport: HttpTransport[F],
-    jsonSupport: JsonSupport,
-    cache: Cache[F, OpenIdConfig]
+                             httpTransport: Transport[F],
+                             jsonSupport: JsonSupport,
+                             cache: Cache[F, OpenIdConfig]
   ): OpenIdConnectDiscovery[F] =
     new OpenIdConnectDiscovery[F] {
 
@@ -55,7 +59,7 @@ object OpenIdConnectDiscovery {
 
   object Error {
     case class CouldNotDecodeResponse(details: String) extends Error
-    case class CouldNotFetchResponse(cause: HttpTransport.Error) extends Error
+    case class CouldNotFetchResponse(cause: Transport.Error) extends Error
   }
 
 }

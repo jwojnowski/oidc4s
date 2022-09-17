@@ -1,6 +1,6 @@
-package me.wojnowski.oidc4s.circe
+package me.wojnowski.oidc4s.json.circe
 
-import me.wojnowski.oidc4s.JsonDecoder
+import me.wojnowski.oids4s.json.circe.CirceJsonSupport
 import munit.FunSuite
 import pdi.jwt.JwtHeader
 
