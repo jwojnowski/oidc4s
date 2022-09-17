@@ -1,22 +1,18 @@
 package me.wojnowski.oidc4s.sttp
 
-import cats.Applicative
-import cats.Monad
-import me.wojnowski.oidc4s.HttpTransport
-import sttp.client3._
-
-import scala.util.Try
 import cats.syntax.all._
-import me.wojnowski.oidc4s
+import me.wojnowski.oidc4s.HttpTransport
 import me.wojnowski.oidc4s.HttpTransport.Error
-import sttp.model.Header
-import sttp.model.HeaderNames.CacheControl
-import sttp.model.Headers
+import sttp.client3._
+import sttp.model.HeaderNames
 import sttp.model.headers.CacheDirective
 import sttp.monad.MonadError
 import sttp.monad.syntax._
 
+import java.util.concurrent.TimeUnit
 import scala.concurrent.duration.Duration
+import scala.concurrent.duration.FiniteDuration
+import scala.util.Try
 import scala.util.control.NonFatal
 
 object SttpTransport {
@@ -33,13 +29,29 @@ object SttpTransport {
               response
                 .body
                 .map { data =>
-                  val maybeExpiresIn =
+                  val maybeMaxAge =
                     response
-                      .header(CacheControl)
-                      .flatMap(value =>
+                      .header(HeaderNames.CacheControl)
+                      .flatMap { value =>
                         CacheDirective.parse(value).collectFirst { case Right(CacheDirective.MaxAge(finiteDuration)) => finiteDuration }
-                      )
-                  HttpTransport.Response(data, expiresIn = maybeExpiresIn) // TODO Age?
+                      }
+
+                  val maybeAge =
+                    response
+                      .header(HeaderNames.Age)
+                      .flatMap { value =>
+                        value.toLongOption.filter(_ >= 0)
+                      }
+                      .map { seconds =>
+                        FiniteDuration(seconds, TimeUnit.SECONDS)
+                      }
+
+                  val maybeExpiresIn =
+                    maybeMaxAge.map { maxAge =>
+                      maxAge - maybeAge.getOrElse(Duration.Zero)
+                    }
+
+                  HttpTransport.Response(data, expiresIn = maybeExpiresIn)
                 }
                 .leftMap { errorResponse =>
                   Error.UnexpectedResponse(response.code.code, errorResponse.some)

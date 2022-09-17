@@ -86,7 +86,7 @@ class SttpTransportTest extends FunSuite {
     assertEquals(result, expected = Success(Right(HttpTransport.Response("data", expiresIn = None))))
   }
 
-  test("Correct response (valid cache headers)") {
+  test("Correct response (valid cache headers, no age)") {
     val backend: SttpBackendStub[Try, Nothing] =
       SttpBackendStub(TryMonad)
         .whenRequestMatches(request => request.method == Method.GET && request.uri == uri"$correctUrl")
@@ -104,6 +104,29 @@ class SttpTransportTest extends FunSuite {
     val result = transport.get(correctUrl)
 
     assertEquals(result, expected = Success(Right(HttpTransport.Response("data", expiresIn = Some(FiniteDuration(1, "day"))))))
+  }
+
+  test("Correct response (valid cache headers, age present)") {
+    val backend: SttpBackendStub[Try, Nothing] =
+      SttpBackendStub(TryMonad)
+        .whenRequestMatches(request => request.method == Method.GET && request.uri == uri"$correctUrl")
+        .thenRespond(
+          Response(
+            "data",
+            StatusCode.Ok,
+            "OK",
+            Seq(
+              Header(HeaderNames.CacheControl, "no-transform,max-age=86400,stale-while-revalidate"),
+              Header(HeaderNames.Age, "3600"),
+            )
+          )
+        )
+
+    val transport = SttpTransport.instance[Try](backend)
+
+    val result = transport.get(correctUrl)
+
+    assertEquals(result, expected = Success(Right(HttpTransport.Response("data", expiresIn = Some(FiniteDuration(23, "hours"))))))
   }
 
 }
