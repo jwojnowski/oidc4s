@@ -1,5 +1,3 @@
-ThisBuild / version := "0.1.0-SNAPSHOT"
-
 ThisBuild / scalaVersion := "2.13.8"
 
 val Scala213 = "2.13.8"
@@ -8,6 +6,24 @@ val Scala3 = "3.1.3"
 ThisBuild / scalaVersion := Scala213
 ThisBuild / crossScalaVersions := Seq(Scala213, Scala3)
 ThisBuild / organization := "me.wojnowski"
+
+inThisBuild(
+  List(
+    organization := "me.wojnowski",
+    homepage := Some(url("https://github.com/jwojnowski/oidc4s")),
+    licenses := List("MIT License" -> url("https://opensource.org/licenses/MIT")),
+    developers := List(
+      Developer(
+        "jwojnowski",
+        "Jakub Wojnowski",
+        "29680262+jwojnowski@users.noreply.github.com",
+        url("https://github.com/jwojnowski")
+      )
+    ),
+    sonatypeCredentialHost := "s01.oss.sonatype.org",
+    sonatypeRepository := "https://s01.oss.sonatype.org/service/local"
+  )
+)
 
 val commonSettings = Seq(
   makePom / publishArtifact := true
