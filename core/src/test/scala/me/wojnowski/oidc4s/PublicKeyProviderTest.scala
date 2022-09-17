@@ -8,12 +8,6 @@ import cats.syntax.all._
 import me.wojnowski.oidc4s.PublicKeyProvider.JsonWebKey
 import me.wojnowski.oidc4s.PublicKeyProvider.JsonWebKeySet
 import me.wojnowski.oidc4s.PublicKeyProvider.KeyId
-import munit.FunSuite
-
-import java.security.KeyFactory
-import java.security.PublicKey
-import java.security.spec.X509EncodedKeySpec
-import java.util.Base64
 import me.wojnowski.oidc4s.PublicKeyProviderTest.CountAndState
 import me.wojnowski.oidc4s.config.Location
 import me.wojnowski.oidc4s.config.OpenIdConfig
@@ -23,6 +17,11 @@ import me.wojnowski.oidc4s.mocks.HttpTransportMock
 import me.wojnowski.oidc4s.mocks.JsonSupportMock
 import me.wojnowski.oidc4s.transport.Transport
 import munit.CatsEffectSuite
+
+import java.security.KeyFactory
+import java.security.PublicKey
+import java.security.spec.X509EncodedKeySpec
+import java.util.Base64
 
 class PublicKeyProviderTest extends CatsEffectSuite {
   private val keyFactory = KeyFactory.getInstance("RSA")

@@ -20,9 +20,9 @@ object OpenIdConnectDiscovery {
   def instance[F[_]: Monad](
     location: Location
   )(
-                             httpTransport: Transport[F],
-                             jsonSupport: JsonSupport,
-                             cache: Cache[F, OpenIdConfig]
+    httpTransport: Transport[F],
+    jsonSupport: JsonSupport,
+    cache: Cache[F, OpenIdConfig]
   ): OpenIdConnectDiscovery[F] =
     new OpenIdConnectDiscovery[F] {
 

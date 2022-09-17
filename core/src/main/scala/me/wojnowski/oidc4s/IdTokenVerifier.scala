@@ -3,15 +3,6 @@ package me.wojnowski.oidc4s
 import cats.Monad
 import cats.data.EitherT
 import cats.effect.Clock
-import pdi.jwt.JwtAlgorithm
-import pdi.jwt.JwtClaim
-import pdi.jwt.exceptions.JwtException
-
-import java.nio.charset.StandardCharsets
-import java.security.PublicKey
-import java.time.ZoneId
-import java.util.Base64
-import scala.util.Try
 import cats.syntax.all._
 import me.wojnowski.oidc4s.IdTokenVerifier.Error.CouldNotExtractKeyId
 import me.wojnowski.oidc4s.IdTokenVerifier.Error.JwtVerificationError
@@ -19,9 +10,15 @@ import me.wojnowski.oidc4s.config.OpenIdConnectDiscovery
 import me.wojnowski.oidc4s.json.JsonDecoder
 import me.wojnowski.oidc4s.json.JsonSupport
 import pdi.jwt.Jwt
+import pdi.jwt.JwtAlgorithm
 import pdi.jwt.JwtHeader
 
+import java.nio.charset.StandardCharsets
+import java.security.PublicKey
+import java.time.ZoneId
 import java.time.{Clock => JavaClock}
+import java.util.Base64
+import scala.util.Try
 
 trait IdTokenVerifier[F[_]] {
   def verifyAndDecode(rawToken: String): F[Either[IdTokenVerifier.Error, IdTokenClaims]]

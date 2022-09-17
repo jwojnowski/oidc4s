@@ -1,9 +1,14 @@
 package me.wojnowski.oidc4s
 
-import cats.Functor
 import cats.Monad
 import cats.data.EitherT
+import cats.syntax.all._
+import me.wojnowski.oidc4s.PublicKeyProvider.Error.CouldNotDiscoverConfig
 import me.wojnowski.oidc4s.PublicKeyProvider.KeyId
+import me.wojnowski.oidc4s.config.OpenIdConnectDiscovery
+import me.wojnowski.oidc4s.json.JsonDecoder
+import me.wojnowski.oidc4s.json.JsonSupport
+import me.wojnowski.oidc4s.transport.Transport
 
 import java.math.BigInteger
 import java.security.KeyFactory
@@ -11,13 +16,6 @@ import java.security.PublicKey
 import java.security.spec.RSAPublicKeySpec
 import java.util.Base64
 import scala.util.Try
-import cats.syntax.all._
-import me.wojnowski.oidc4s.PublicKeyProvider.Error
-import me.wojnowski.oidc4s.PublicKeyProvider.Error.CouldNotDiscoverConfig
-import me.wojnowski.oidc4s.config.OpenIdConnectDiscovery
-import me.wojnowski.oidc4s.json.JsonDecoder
-import me.wojnowski.oidc4s.json.JsonSupport
-import me.wojnowski.oidc4s.transport.Transport
 
 trait PublicKeyProvider[F[_]] {
   def getKey(keyId: KeyId): F[Either[PublicKeyProvider.Error, PublicKey]]
@@ -35,8 +33,8 @@ object PublicKeyProvider {
   def jwks[F[_]: Monad](
     discovery: OpenIdConnectDiscovery[F]
   )(
-                         transport: Transport[F],
-                         jsonSupport: JsonSupport
+    transport: Transport[F],
+    jsonSupport: JsonSupport
   ): PublicKeyProvider[F] =
     new PublicKeyProvider[F] {
 

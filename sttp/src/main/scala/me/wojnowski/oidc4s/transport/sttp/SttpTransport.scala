@@ -1,8 +1,8 @@
 package me.wojnowski.oidc4s.transport.sttp
 
 import cats.syntax.all._
-import me.wojnowski.oidc4s.transport.Transport.Error
 import me.wojnowski.oidc4s.transport.Transport
+import me.wojnowski.oidc4s.transport.Transport.Error
 import sttp.client3._
 import sttp.model.HeaderNames
 import sttp.model.headers.CacheDirective

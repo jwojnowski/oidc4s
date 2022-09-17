@@ -2,10 +2,10 @@ package me.wojnowski.oidc4s
 
 import cats.effect.IO
 import cats.effect.testkit.TestControl
+import cats.syntax.all._
 import munit.CatsEffectSuite
 
 import scala.concurrent.duration.DurationInt
-import cats.syntax.all._
 
 class CatsRefCacheTests extends CatsEffectSuite {
   private val expiration = 10.minutes

@@ -1,12 +1,11 @@
 package me.wojnowski.oidc4s.transport.sttp
 
+import me.wojnowski.oidc4s.transport.Transport
 import me.wojnowski.oidc4s.transport.Transport.Error.InvalidUrl
 import me.wojnowski.oidc4s.transport.Transport.Error.UnexpectedError
 import me.wojnowski.oidc4s.transport.Transport.Error.UnexpectedResponse
-import me.wojnowski.oidc4s.transport.Transport
 import munit.FunSuite
 import sttp.client3.Response
-import sttp.client3.TryHttpURLConnectionBackend
 import sttp.client3.UriContext
 import sttp.client3.testing.SttpBackendStub
 import sttp.model.Header
@@ -15,7 +14,6 @@ import sttp.model.Method
 import sttp.model.StatusCode
 import sttp.monad.TryMonad
 
-import scala.concurrent.duration.Duration
 import scala.concurrent.duration.FiniteDuration
 import scala.util.Success
 import scala.util.Try
@@ -117,7 +115,7 @@ class SttpTransportTest extends FunSuite {
             "OK",
             Seq(
               Header(HeaderNames.CacheControl, "no-transform,max-age=86400,stale-while-revalidate"),
-              Header(HeaderNames.Age, "3600"),
+              Header(HeaderNames.Age, "3600")
             )
           )
         )

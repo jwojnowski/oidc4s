@@ -91,7 +91,7 @@ class IdTokenVerifierTest extends CatsEffectSuite {
         .map {
           case Left(IdTokenVerifier.Error.UnexpectedIssuer(Issuer("https://thisisnotgoogle.com"), issuer)) =>
             assertEquals(issuer, Issuer("https://accounts.google.com"))
-          case e                                                                                    =>
+          case e                                                                                           =>
             fail(s"expected UnexpectedIssuer, got $e")
         }
     }
@@ -200,7 +200,8 @@ class IdTokenVerifierTest extends CatsEffectSuite {
         )
         .flatMap { rotatingCache =>
           val rotatingDiscovery =
-            OpenIdConnectDiscovery.instance[IO](Location.unsafeCreate("https://doesnt-matter"))(HttpTransportMock.const("", ""), jsonSupport, rotatingCache)
+            OpenIdConnectDiscovery
+              .instance[IO](Location.unsafeCreate("https://doesnt-matter"))(HttpTransportMock.const("", ""), jsonSupport, rotatingCache)
 
           val verifier =
             IdTokenVerifier
@@ -240,8 +241,7 @@ object IdTokenVerifierTest {
       override def getKey(keyId: KeyId): F[Either[PublicKeyProvider.Error, PublicKey]] =
         keys.get(keyId).toRight(PublicKeyProvider.Error.CouldNotFindPublicKey(keyId)).leftWiden[PublicKeyProvider.Error].pure[F]
 
-      override def getAllKeys
-        : F[Either[PublicKeyProvider.Error, KeyMap]] =
+      override def getAllKeys: F[Either[PublicKeyProvider.Error, KeyMap]] =
         keys.asRight[PublicKeyProvider.Error].pure[F]
 
     }

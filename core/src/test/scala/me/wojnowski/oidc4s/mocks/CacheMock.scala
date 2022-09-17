@@ -8,7 +8,6 @@ import me.wojnowski.oidc4s.Cache
 
 import scala.concurrent.duration.FiniteDuration
 
-
 object CacheMock {
 
   def rotateData[F[_]: Sync, A](data: NonEmptyVector[A]): F[Cache[F, A]] = Ref[F].of(0L).map { ref =>
