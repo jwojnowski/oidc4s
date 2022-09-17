@@ -1,6 +1,13 @@
 package me.wojnowski.oidc4s.circe
 
+import me.wojnowski.oidc4s.Audience
+import me.wojnowski.oidc4s.AuthenticationContextClassReference
+import me.wojnowski.oidc4s.AuthenticationMethodReference
+import me.wojnowski.oidc4s.AuthorizedParty
 import me.wojnowski.oidc4s.IdTokenClaims
+import me.wojnowski.oidc4s.Issuer
+import me.wojnowski.oidc4s.Nonce
+import me.wojnowski.oidc4s.Subject
 import munit.FunSuite
 
 import java.time.Instant
@@ -16,16 +23,20 @@ class IdTokenClaimsCirceJsonSupportTest extends FunSuite {
       result,
       Right(
         IdTokenClaims(
-          issuer = "https://openid.c2id.com",
-          subject = "alice",
-          audience = Set("client-12345"),
+          issuer = Issuer("https://openid.c2id.com"),
+          subject = Subject("alice"),
+          audience = Set(Audience("client-12345")),
           expiration = Instant.parse("2011-07-21T20:59:30Z"),
           issuedAt = Instant.parse("2011-07-21T20:42:50Z"),
           authenticationTime = Some(Instant.parse("2011-07-21T20:42:49Z")),
-          nonce = Some("n-0S6_WzA2Mj"),
-          authenticationContextClassReference = Some("c2id.loa.hisec"),
-          authenticationMethodsReference = List("pwd", "rsa", "mfa"),
-          authorizedParty = Some("client-00001")
+          nonce = Some(Nonce("n-0S6_WzA2Mj")),
+          authenticationContextClassReference = Some(AuthenticationContextClassReference("c2id.loa.hisec")),
+          authenticationMethodsReference = List(
+            AuthenticationMethodReference("pwd"),
+            AuthenticationMethodReference("rsa"),
+            AuthenticationMethodReference("mfa")
+          ),
+          authorizedParty = Some(AuthorizedParty("client-00001"))
         )
       )
     )
@@ -41,9 +52,9 @@ class IdTokenClaimsCirceJsonSupportTest extends FunSuite {
       result,
       Right(
         IdTokenClaims(
-          issuer = "https://openid.c2id.com",
-          subject = "alice",
-          audience = Set("client-12345"),
+          issuer = Issuer("https://openid.c2id.com"),
+          subject = Subject("alice"),
+          audience = Set(Audience("client-12345")),
           expiration = Instant.parse("2011-07-21T20:59:30Z"),
           issuedAt = Instant.parse("2011-07-21T20:42:50Z")
         )
@@ -61,9 +72,9 @@ class IdTokenClaimsCirceJsonSupportTest extends FunSuite {
       result,
       Right(
         IdTokenClaims(
-          issuer = "https://openid.c2id.com",
-          subject = "alice",
-          audience = Set("client-12345", "client-54321"),
+          issuer = Issuer("https://openid.c2id.com"),
+          subject = Subject("alice"),
+          audience = Set(Audience("client-12345"), Audience("client-54321")),
           expiration = Instant.parse("2011-07-21T20:59:30Z"),
           issuedAt = Instant.parse("2011-07-21T20:42:50Z")
         )

@@ -11,7 +11,7 @@ class OpenIdConnectDiscoveryTest extends FunSuite {
   test("Happy path") {
     val expectedConfig =
       OpenIdConfig(
-        "issuer",
+        Issuer("issuer"),
         "https://jwksUri"
       )
     val transport = HttpTransportMock.const[Id](configurationUrl, response = "correct-config-response")
@@ -19,7 +19,7 @@ class OpenIdConnectDiscoveryTest extends FunSuite {
       expectedConfig
     })
 
-    val discovery = OpenIdConnectDiscovery.instance[Id](Location("https://appleid.apple.com"))(transport, jsonSupport, Cache.noop)
+    val discovery = OpenIdConnectDiscovery.instance[Id](Location.unsafeCreate("https://appleid.apple.com"))(transport, jsonSupport, Cache.noop)
 
     val result = discovery.getConfig
 
@@ -30,7 +30,7 @@ class OpenIdConnectDiscoveryTest extends FunSuite {
     val transport = HttpTransportMock.const[Id]("this-will-fail", response = "")
     val jsonSupport = JsonSupportMock.instance()
 
-    val discovery = OpenIdConnectDiscovery.instance[Id](Location("https://appleid.apple.com"))(transport, jsonSupport, Cache.noop)
+    val discovery = OpenIdConnectDiscovery.instance[Id](Location.unsafeCreate("https://appleid.apple.com"))(transport, jsonSupport, Cache.noop)
 
     val result = discovery.getConfig
 
@@ -44,7 +44,7 @@ class OpenIdConnectDiscoveryTest extends FunSuite {
     val transport = HttpTransportMock.const[Id](configurationUrl, response = "correct-config-response")
     val jsonSupport = JsonSupportMock.instance()
 
-    val discovery = OpenIdConnectDiscovery.instance[Id](Location("https://appleid.apple.com"))(transport, jsonSupport, Cache.noop)
+    val discovery = OpenIdConnectDiscovery.instance[Id](Location.unsafeCreate("https://appleid.apple.com"))(transport, jsonSupport, Cache.noop)
 
     val result = discovery.getConfig
 

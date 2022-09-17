@@ -41,7 +41,6 @@ object IdTokenVerifier {
       override def verifyAndDecode(rawToken: String): F[Either[IdTokenVerifier.Error, IdTokenClaims]] =
         verifyAndDecodeFullResult(rawToken).map(_.map(_.decodedClaims))
 
-      // TODO rename?
       override def verifyAndDecodeFullResult(rawToken: String): F[Either[IdTokenVerifier.Error, IdTokenVerifier.Result]] = {
         for {
           config     <- EitherT(discovery.getConfig).leftMap(IdTokenVerifier.Error.CouldNotDiscoverConfig.apply)
@@ -61,7 +60,7 @@ object IdTokenVerifier {
         rawToken: String,
         javaClock: JavaClock,
         publicKey: PublicKey,
-        expectedIssuer: String
+        expectedIssuer: Issuer
       ): Either[Error, (IdTokenClaims, String)] =
         Jwt(javaClock)
           .decodeRaw(rawToken, publicKey, supportedAlgorithms)
@@ -75,8 +74,7 @@ object IdTokenVerifier {
           }
           .flatTap { case (idTokenClaims, _) => ensureExpectedIssuer(idTokenClaims.issuer, expectedIssuer) }
 
-      // TODO Issuer type
-      private def ensureExpectedIssuer(tokenIssuer: String, expectedIssuer: String): Either[Error.UnexpectedIssuer, Unit] =
+      private def ensureExpectedIssuer(tokenIssuer: Issuer, expectedIssuer: Issuer): Either[Error.UnexpectedIssuer, Unit] =
         Either.cond(expectedIssuer === tokenIssuer, (), IdTokenVerifier.Error.UnexpectedIssuer(tokenIssuer, expectedIssuer))
 
       private def extractKid(headerJson: String): Either[CouldNotExtractKeyId.type, String] =
@@ -98,12 +96,11 @@ object IdTokenVerifier {
 
   case class Result(rawHeader: String, rawClaims: String, decodedClaims: IdTokenClaims)
 
-  sealed trait Error extends ProductSerializableNoStacktrace
+  sealed trait Error extends ProductSerializableNoStackTrace
 
   object Error {
     case class CouldNotDiscoverConfig(cause: OpenIdConnectDiscovery.Error) extends Error
 
-    // TODO extract, decode, partially decode?
     case object CouldNotExtractHeader extends Error
 
     case object CouldNotExtractKeyId extends Error
@@ -114,7 +111,7 @@ object IdTokenVerifier {
 
     case class JwtVerificationError(cause: Throwable) extends Error
 
-    case class UnexpectedIssuer(found: String, expected: String) extends Error
+    case class UnexpectedIssuer(found: Issuer, expected: Issuer) extends Error
   }
 
 }

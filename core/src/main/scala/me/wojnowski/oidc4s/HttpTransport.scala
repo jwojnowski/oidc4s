@@ -13,7 +13,7 @@ trait HttpTransport[F[_]] {
 object HttpTransport {
   case class Response(data: String, expiresIn: Option[FiniteDuration])
 
-  sealed trait Error extends ProductSerializableNoStacktrace
+  sealed trait Error extends ProductSerializableNoStackTrace
 
   object Error {
     case class InvalidUrl(providedUrl: String) extends Error

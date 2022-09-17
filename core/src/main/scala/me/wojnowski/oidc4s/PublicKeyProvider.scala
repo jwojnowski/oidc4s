@@ -25,12 +25,10 @@ trait PublicKeyProvider[F[_]] {
 object PublicKeyProvider {
   type KeyId = String
 
-  // TODO rename Keys?
   type KeyMap = Map[KeyId, PublicKey]
 
   private val rsaKeyFactory = KeyFactory.getInstance("RSA")
 
-  // TODO think about the arguments
   def jwks[F[_]: Monad](
     discovery: OpenIdConnectDiscovery[F]
   )(
@@ -108,7 +106,7 @@ object PublicKeyProvider {
 
   }
 
-  sealed trait Error extends ProductSerializableNoStacktrace
+  sealed trait Error extends ProductSerializableNoStackTrace
 
   object Error {
     case class CouldNotDiscoverConfig(cause: OpenIdConnectDiscovery.Error) extends Error

@@ -51,7 +51,7 @@ object OpenIdConnectDiscovery {
     override def getConfig: F[Either[Error, OpenIdConfig]] = config.asRight[Error].pure[F]
   }
 
-  sealed trait Error extends ProductSerializableNoStacktrace
+  sealed trait Error extends ProductSerializableNoStackTrace
 
   object Error {
     case class CouldNotDecodeResponse(details: String) extends Error

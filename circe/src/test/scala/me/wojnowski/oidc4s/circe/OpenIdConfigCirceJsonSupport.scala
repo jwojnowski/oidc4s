@@ -1,10 +1,9 @@
 package me.wojnowski.oidc4s.circe
 
+import me.wojnowski.oidc4s.Issuer
 import me.wojnowski.oidc4s.OpenIdConfig
 import munit.FunSuite
 
-import java.nio.file.Files
-import java.nio.file.Paths
 import scala.io.Source
 
 class OpenIdConfigCirceJsonSupport extends FunSuite {
@@ -17,7 +16,7 @@ class OpenIdConfigCirceJsonSupport extends FunSuite {
       result,
       expected = Right(
         OpenIdConfig(
-          issuer = "https://appleid.apple.com",
+          issuer = Issuer("https://appleid.apple.com"),
           jwksUri = "https://appleid.apple.com/auth/keys"
         )
       )

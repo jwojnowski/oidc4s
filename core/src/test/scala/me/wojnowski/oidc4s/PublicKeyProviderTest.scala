@@ -60,7 +60,7 @@ class PublicKeyProviderTest extends CatsEffectSuite {
 
   private val jsonSupport = JsonSupportMock.instance(jsonWebKeySetTranslations = { _ => jsonWebKeySet })
 
-  val discovery: OpenIdConnectDiscovery[Id] = OpenIdConnectDiscovery.static[Id](OpenIdConfig(issuer = "", jwksUrl))
+  val discovery: OpenIdConnectDiscovery[Id] = OpenIdConnectDiscovery.static[Id](OpenIdConfig(issuer = Issuer(""), jwksUrl))
 
   val keyProvider: PublicKeyProvider[Id] = PublicKeyProvider.jwks[Id](discovery)(transport, jsonSupport)
 
@@ -101,14 +101,14 @@ class PublicKeyProviderTest extends CatsEffectSuite {
     CacheMock
       .rotateData[IO, OpenIdConfig](
         NonEmptyVector.of(
-          OpenIdConfig(issuer = "", jwksUri = "https://a"),
-          OpenIdConfig(issuer = "", jwksUri = "https://b")
+          OpenIdConfig(issuer = Issuer(""), jwksUri = "https://a"),
+          OpenIdConfig(issuer = Issuer(""), jwksUri = "https://b")
         )
       )
       .flatMap { rotatingCache =>
         val rotatingDiscovery =
           OpenIdConnectDiscovery
-            .instance[IO](Location(""))(
+            .instance[IO](Location.unsafeCreate("https://spanish-inquisition"))(
               HttpTransportMock.const("nobody-expects-spanish-inquisition", "a"),
               jsonSupport,
               rotatingCache

@@ -36,7 +36,7 @@ class IdTokenVerifierTest extends CatsEffectSuite {
       jwtHeaderTranslations = rawJwtHeaders.zip(decodedJwtHeaders).toMap
     )
 
-  private val discovery = OpenIdConnectDiscovery.static[IO](OpenIdConfig(issuer = "https://accounts.google.com", jwksUri = ""))
+  private val discovery = OpenIdConnectDiscovery.static[IO](OpenIdConfig(issuer = Issuer("https://accounts.google.com"), jwksUri = ""))
 
   test("Correct IdentityToken signed with RS256") {
     runAtInstant(idTokenExpiration.minusSeconds(3)) {
@@ -83,8 +83,8 @@ class IdTokenVerifierTest extends CatsEffectSuite {
         .create[IO](staticKeyProvider(nonGoogleKeys), discovery, jsonSupport)
         .verifyAndDecode(tokenWithOtherIssuer)
         .map {
-          case Left(IdTokenVerifier.Error.UnexpectedIssuer("https://thisisnotgoogle.com", issuers)) =>
-            assertEquals(issuers, "https://accounts.google.com")
+          case Left(IdTokenVerifier.Error.UnexpectedIssuer(Issuer("https://thisisnotgoogle.com"), issuer)) =>
+            assertEquals(issuer, Issuer("https://accounts.google.com"))
           case e                                                                                    =>
             fail(s"expected UnexpectedIssuer, got $e")
         }
@@ -111,7 +111,7 @@ class IdTokenVerifierTest extends CatsEffectSuite {
       "eyJhbGciOiJSUzI1NiIsImtpZCI6IjExZTAzZjM5YjhkMzAwYzhjOWExYjgwMGRkZWJmY2ZkZTQxNTJjMGMiLCJ0eXAiOiJKV1QifQ.eyJhdWQiOiJodHRwczovL2V4YW1wbGUuY29tL3BhdGgiLCJhenAiOiJpbnRlZ3JhdGlvbi10ZXN0c0BjaGluZ29yLXRlc3QuaWFtLmdzZXJ2aWNlYWNjb3VudC5jb20iLCJlbWFpbCI6ImludGVncmF0aW9uLXRlc3RzQGNoaW5nb3ItdGVzdC5pYW0uZ3NlcnZpY2VhY2NvdW50LmNvbSIsImVtYWlsX3ZlcmlmaWVkIjp0cnVlLCJleHAiOjE1ODc2Mjk4ODgsImlhdCI6MTU4NzYyNjI4OCwiaXNzIjoiaHR0cHM6Ly90aGlzaXNub3Rnb29nbGUuY29tIiwic3ViIjoiMTA0MDI5MjkyODUzMDk5OTc4MjkzIn0.g_FcdLByRX9STZaIWj9OGPZu-t6OtJUtw3h-7KjxHeVoGD7DBvy0qcRrS66ieVDowRcuvAWgBvdd6FNH8uHUiFYzx2But5abVQgZEZfUQLamWXnPH_Y-HdieC7vq3HxeKtBpBAFKt_LNSsw3xoA5sT_CJPsK-JG-GeO6BpY3cEbaNt0p7bRpe3YdaL7m86p045r9WwkXRcHbzF2OEHM2GR1zguYIXEax_VUPFTEV0V2xE04yxiQ0TbcXsxz3jC_SDoJVK0uchtGHl8vtxaS3JHEJuUr10OquwoR3-uDamMjlQyxdz3EIBqq9Z6zUXY9cJKIvaWSNO4BeNzZBxc8vEA"
 
     val discoveryWithDifferentIssuer =
-      OpenIdConnectDiscovery.static[IO](OpenIdConfig(issuer = "https://thisisnotgoogle.com", jwksUri = ""))
+      OpenIdConnectDiscovery.static[IO](OpenIdConfig(issuer = Issuer("https://thisisnotgoogle.com"), jwksUri = ""))
 
     runAtInstant(idTokenExpiration.minusSeconds(3)) {
       IdTokenVerifier
@@ -188,13 +188,13 @@ class IdTokenVerifierTest extends CatsEffectSuite {
       CacheMock
         .rotateData[IO, OpenIdConfig](
           NonEmptyVector.of(
-            OpenIdConfig(issuer = "A", jwksUri = ""),
-            OpenIdConfig(issuer = "B", jwksUri = "")
+            OpenIdConfig(issuer = Issuer("A"), jwksUri = ""),
+            OpenIdConfig(issuer = Issuer("B"), jwksUri = "")
           )
         )
         .flatMap { rotatingCache =>
           val rotatingDiscovery =
-            OpenIdConnectDiscovery.instance[IO](Location(""))(HttpTransportMock.const("", ""), jsonSupport, rotatingCache)
+            OpenIdConnectDiscovery.instance[IO](Location.unsafeCreate("https://doesnt-matter"))(HttpTransportMock.const("", ""), jsonSupport, rotatingCache)
 
           val verifier =
             IdTokenVerifier
@@ -210,10 +210,10 @@ class IdTokenVerifierTest extends CatsEffectSuite {
               assertEquals(
                 result,
                 List(
-                  Left(UnexpectedIssuer("https://accounts.google.com", "A")),
-                  Left(UnexpectedIssuer("https://accounts.google.com", "B")),
-                  Left(UnexpectedIssuer("https://accounts.google.com", "A")),
-                  Left(UnexpectedIssuer("https://accounts.google.com", "B"))
+                  Left(UnexpectedIssuer(Issuer("https://accounts.google.com"), Issuer("A"))),
+                  Left(UnexpectedIssuer(Issuer("https://accounts.google.com"), Issuer("B"))),
+                  Left(UnexpectedIssuer(Issuer("https://accounts.google.com"), Issuer("A"))),
+                  Left(UnexpectedIssuer(Issuer("https://accounts.google.com"), Issuer("B")))
                 )
               )
             }
@@ -273,16 +273,16 @@ object IdTokenVerifierTest {
     val decodedIdTokenClaims =
       List(
         IdTokenClaims(
-          issuer = "https://accounts.google.com",
-          subject = "104029292853099978293",
-          audience = Set("https://example.com/path"),
+          issuer = Issuer("https://accounts.google.com"),
+          subject = Subject("104029292853099978293"),
+          audience = Set(Audience("https://example.com/path")),
           expiration = idTokenExpiration,
           issuedAt = Instant.parse("2020-04-23T07:18:08Z")
         ),
         IdTokenClaims(
-          issuer = "https://thisisnotgoogle.com",
-          subject = "104029292853099978293",
-          audience = Set("https://example.com/path"),
+          issuer = Issuer("https://thisisnotgoogle.com"),
+          subject = Subject("104029292853099978293"),
+          audience = Set(Audience("https://example.com/path")),
           expiration = idTokenExpiration,
           issuedAt = Instant.parse("2020-04-23T07:18:08Z")
         )

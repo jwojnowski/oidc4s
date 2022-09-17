@@ -1,24 +1,46 @@
 package me.wojnowski.oidc4s.circe
 
 import io.circe.Decoder
+import me.wojnowski.oidc4s.Audience
+import me.wojnowski.oidc4s.AuthenticationContextClassReference
+import me.wojnowski.oidc4s.AuthenticationMethodReference
+import me.wojnowski.oidc4s.AuthorizedParty
 import me.wojnowski.oidc4s.IdTokenClaims
+import me.wojnowski.oidc4s.Issuer
+import me.wojnowski.oidc4s.Nonce
+import me.wojnowski.oidc4s.Subject
 
 import java.time.Instant
 
 trait IdTokenCirceDecoder {
+  private implicit val issuerDecoder: Decoder[Issuer] =
+    Decoder[String].map(Issuer.apply)
+  private implicit val subjectDecoder: Decoder[Subject] =
+    Decoder[String].map(Subject.apply)
+  private implicit val audienceDecoder: Decoder[Audience] =
+    Decoder[String].map(Audience.apply)
+  private implicit val nonceDecoder: Decoder[Nonce] =
+    Decoder[String].map(Nonce.apply)
+  private implicit val accrDecoder: Decoder[AuthenticationContextClassReference] =
+    Decoder[String].map(AuthenticationContextClassReference.apply)
+  private implicit val amrDecoder: Decoder[AuthenticationMethodReference] =
+    Decoder[String].map(AuthenticationMethodReference.apply)
+  private implicit val authorizedPartyDecoder: Decoder[AuthorizedParty] =
+    Decoder[String].map(AuthorizedParty.apply)
+
   protected implicit val jwtIdTokenDecoder: Decoder[IdTokenClaims] =
     Decoder.forProduct10[
       IdTokenClaims,
-      String,
-      String,
-      Either[String, Set[String]],
+      Issuer,
+      Subject,
+      Either[Audience, Set[Audience]],
       Long,
       Long,
       Option[Long],
-      Option[String],
-      Option[String],
-      Option[List[String]],
-      Option[String]
+      Option[Nonce],
+      Option[AuthenticationContextClassReference],
+      Option[List[AuthenticationMethodReference]],
+      Option[AuthorizedParty]
     ](
       "iss",
       "sub",
@@ -32,16 +54,16 @@ trait IdTokenCirceDecoder {
       "azp"
     ) {
       (
-        issuer: String,
-        subject: String,
-        audience: Either[String, Set[String]],
+        issuer: Issuer,
+        subject: Subject,
+        audience: Either[Audience, Set[Audience]],
         expiration: Long,
         issuedAt: Long,
         authenticationTime: Option[Long],
-        nonce: Option[String],
-        authenticationContextClassReference: Option[String],
-        authenticationMethodsReference: Option[List[String]],
-        authenticationParty: Option[String]
+        nonce: Option[Nonce],
+        authenticationContextClassReference: Option[AuthenticationContextClassReference],
+        authenticationMethodsReference: Option[List[AuthenticationMethodReference]],
+        authenticationParty: Option[AuthorizedParty]
       ) =>
         IdTokenClaims(
           issuer = issuer,
@@ -60,10 +82,11 @@ trait IdTokenCirceDecoder {
   private implicit def fallbackEitherDecoder[A: Decoder, B: Decoder]: Decoder[Either[A, B]] =
     Decoder.instance { hCursor =>
       hCursor.as[A] match {
-        case Left(_) =>
+        case Left(_)       =>
           hCursor.as[B].map(Right(_))
         case Right(string) =>
           Right(Left(string))
       }
     }
+
 }
