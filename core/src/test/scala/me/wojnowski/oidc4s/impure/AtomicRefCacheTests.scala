@@ -1,4 +1,4 @@
-package me.wojnowski.oidc4s
+package me.wojnowski.oidc4s.impure
 
 import cats.effect.IO
 import cats.effect.testkit.TestControl
@@ -13,7 +13,7 @@ class AtomicRefCacheTests extends CatsEffectSuite {
   val value = "A"
 
   test("Empty cache returns None") {
-    val cache = Cache.atomicRef[IO, String]()
+    val cache = AtomicRefCache[IO, String]()
 
     for {
       result <- cache.get
@@ -21,7 +21,7 @@ class AtomicRefCacheTests extends CatsEffectSuite {
   }
 
   test("Cache returns the value if entry is not stale") {
-    val cache = Cache.atomicRef[IO, String]()
+    val cache = AtomicRefCache[IO, String]()
 
     for {
       _      <- cache.put(value, expiresIn = expiration.some)
@@ -31,7 +31,7 @@ class AtomicRefCacheTests extends CatsEffectSuite {
 
   test("Cache with expired entry returns None") {
     TestControl.executeEmbed {
-      val cache = Cache.atomicRef[IO, String](defaultExpiration = 10.minutes)
+      val cache = AtomicRefCache[IO, String](defaultExpiration = 10.minutes)
 
       for {
         _      <- cache.put(value, expiresIn = 5.minutes.some)
@@ -43,7 +43,7 @@ class AtomicRefCacheTests extends CatsEffectSuite {
 
   test("Cache uses default expiration if entry doesn't have one") {
     TestControl.executeEmbed {
-      val cache = Cache.atomicRef[IO, String](defaultExpiration = 10.minutes)
+      val cache = AtomicRefCache[IO, String](defaultExpiration = 10.minutes)
 
       for {
         _                  <- cache.put(value, expiresIn = None)
@@ -63,7 +63,7 @@ class AtomicRefCacheTests extends CatsEffectSuite {
       val firstValue = "X"
       val secondValue = "Y"
 
-      val cache = Cache.atomicRef[IO, String](defaultExpiration = 10.minutes)
+      val cache = AtomicRefCache[IO, String](defaultExpiration = 10.minutes)
 
       for {
         _       <- cache.put(firstValue, expiresIn = 25.minutes.some)

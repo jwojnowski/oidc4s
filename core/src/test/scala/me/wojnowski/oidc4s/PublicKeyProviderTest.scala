@@ -192,7 +192,6 @@ class PublicKeyProviderTest extends CatsEffectSuite {
         x     <- cachedKeyProvider.getKey(keyId3) // calls: 1
         _     <- cachedKeyProvider.getKey(keyId3) // calls: 0
         state <- ref.get
-        _ = println(x)
       } yield assertEquals(state.requestCount, 2)
     }
   }

@@ -1,14 +1,12 @@
 package me.wojnowski.oidc4s
 
 import cats.Applicative
-import cats.Monad
 import cats.effect.Clock
 import cats.effect.Ref
 import cats.effect.Sync
 import cats.syntax.all._
 
 import java.time.Instant
-import java.util.concurrent.atomic.AtomicReference
 import scala.concurrent.duration.DAYS
 import scala.concurrent.duration.FiniteDuration
 
@@ -27,32 +25,6 @@ object Cache {
 
     override def put(value: A, expiresIn: Option[FiniteDuration]): F[Unit] = ().pure[F]
   }
-
-  def atomicRef[F[_]: Monad: Clock, A](defaultExpiration: FiniteDuration = DefaultExpiration): Cache[F, A] =
-    new Cache[F, A] {
-      // Used directly instead of cats.effect.Ref[], as this particular use
-      // does not seem to require Sync[F]
-      private val configRef = new AtomicReference[Option[Entry[A]]](None)
-
-      override def get: F[Option[A]] =
-        for {
-          now <- Clock[F].realTimeInstant
-          maybeEntry = configRef.get
-        } yield maybeEntry.filter(_.expiresAt.isAfter(now)).map(_.value)
-
-      override def put(config: A, expiresIn: Option[FiniteDuration]): F[Unit] =
-        Clock[F].realTimeInstant.map { now =>
-          val expiresAt = now.plusNanos(expiresIn.getOrElse(defaultExpiration).toNanos)
-          configRef.updateAndGet {
-            case Some(entry) if entry.expiresAt.isAfter(expiresAt) =>
-              Some(entry)
-            case _                                                 =>
-              Some(Entry(config, expiresAt))
-          }
-          ()
-        }
-
-    }
 
   def catsRef[F[_]: Sync, A](defaultExpiration: FiniteDuration = DefaultExpiration): F[Cache[F, A]] =
     Ref.of[F, Option[Entry[A]]](None).map { configRef =>
@@ -74,9 +46,10 @@ object Cache {
                 Some(Entry(config, expiresAt))
             }.void
           }
+
       }
 
     }
 
-  private case class Entry[A](value: A, expiresAt: Instant)
+  case class Entry[A](value: A, expiresAt: Instant)
 }

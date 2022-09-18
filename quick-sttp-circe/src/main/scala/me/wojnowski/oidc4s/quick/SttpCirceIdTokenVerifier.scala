@@ -11,6 +11,7 @@ import me.wojnowski.oidc4s.PublicKeyProvider.KeyMap
 import me.wojnowski.oidc4s.config.Location
 import me.wojnowski.oidc4s.config.OpenIdConfig
 import me.wojnowski.oidc4s.config.OpenIdConnectDiscovery
+import me.wojnowski.oidc4s.impure.AtomicRefCache
 import me.wojnowski.oidc4s.transport.sttp.SttpTransport
 import me.wojnowski.oids4s.json.circe.CirceJsonSupport
 import sttp.client3.SttpBackend
@@ -36,8 +37,8 @@ object SttpCirceIdTokenVerifier {
   )(
     backend: SttpBackend[F, Any]
   ): IdTokenVerifier[F] = {
-    val configCache = Cache.atomicRef[F, OpenIdConfig](defaultExpiration)
-    val publicKeyProviderCache = Cache.atomicRef[F, KeyMap](defaultExpiration)
+    val configCache = AtomicRefCache[F, OpenIdConfig](defaultExpiration)
+    val publicKeyProviderCache = AtomicRefCache[F, KeyMap](defaultExpiration)
 
     cached(location, configCache, publicKeyProviderCache)(backend)
   }
