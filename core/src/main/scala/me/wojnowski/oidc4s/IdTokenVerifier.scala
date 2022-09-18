@@ -104,7 +104,7 @@ object IdTokenVerifier {
 
     }
 
-  case class Result(rawHeader: String, rawClaims: String, decodedClaims: IdTokenClaims)
+  case class Result(rawHeaderJson: String, rawClaimsJson: String, decodedClaims: IdTokenClaims)
 
   sealed trait Error extends ProductSerializableNoStackTrace
 
