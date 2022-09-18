@@ -21,6 +21,8 @@ import java.util.Base64
 import scala.util.Try
 
 trait IdTokenVerifier[F[_]] {
+  def verify(rawToken: String, expectedClientId: ClientId): F[Either[IdTokenVerifier.Error, IdTokenClaims.Subject]]
+
   def verifyAndDecode(rawToken: String): F[Either[IdTokenVerifier.Error, IdTokenClaims]]
 
   def verifyAndDecodeFullResult(rawToken: String): F[Either[IdTokenVerifier.Error, IdTokenVerifier.Result]]
@@ -37,6 +39,9 @@ object IdTokenVerifier {
       import jsonSupport._
 
       private val supportedAlgorithms = Seq(JwtAlgorithm.RS256)
+
+      override def verify(rawToken: String, expectedClientId: ClientId): F[Either[Error, IdTokenClaims.Subject]] =
+        verifyAndDecode(rawToken).map(_.ensure(Error.ClientIdDoesNotMatch)(_.matchesClientId(expectedClientId)).map(_.subject))
 
       override def verifyAndDecode(rawToken: String): F[Either[IdTokenVerifier.Error, IdTokenClaims]] =
         verifyAndDecodeFullResult(rawToken).map(_.map(_.decodedClaims))
@@ -99,6 +104,8 @@ object IdTokenVerifier {
   sealed trait Error extends ProductSerializableNoStackTrace
 
   object Error {
+    case object ClientIdDoesNotMatch extends Error
+
     case class CouldNotDiscoverConfig(cause: OpenIdConnectDiscovery.Error) extends Error
 
     case object CouldNotExtractHeader extends Error

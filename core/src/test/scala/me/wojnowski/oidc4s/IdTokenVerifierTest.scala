@@ -5,6 +5,7 @@ import cats.data.NonEmptyVector
 import cats.effect.IO
 import cats.effect.testkit.TestControl
 import cats.syntax.all._
+import me.wojnowski.oidc4s.IdTokenClaims._
 import me.wojnowski.oidc4s.IdTokenVerifier.Error.JwtVerificationError
 import me.wojnowski.oidc4s.IdTokenVerifier.Error.UnexpectedIssuer
 import me.wojnowski.oidc4s.IdTokenVerifierTest.staticKeyProvider
@@ -75,6 +76,36 @@ class IdTokenVerifierTest extends CatsEffectSuite {
           assertEquals(
             result,
             Right(IdTokenVerifier.Result(rawJwtHeaders.apply(0), rawIdTokenClaims.apply(0), decodedIdTokenClaims.apply(0)))
+          )
+        }
+    }
+  }
+
+  test("Matching Client ID") {
+    runAtInstant(idTokenExpiration.minusSeconds(3)) {
+      IdTokenVerifier
+        .create[IO](staticKeyProvider(googleKeys), discovery, jsonSupport)
+        .verify(rawIdToken, clientId)
+        .map { result =>
+          assertEquals(
+            result,
+            Right(decodedIdTokenClaims.apply(0).subject)
+          )
+        }
+    }
+  }
+
+  test("Not matching Client ID") {
+    runAtInstant(idTokenExpiration.minusSeconds(3)) {
+      val otherClientId = ClientId("other-client-id")
+
+      IdTokenVerifier
+        .create[IO](staticKeyProvider(googleKeys), discovery, jsonSupport)
+        .verify(rawIdToken, otherClientId)
+        .map { result =>
+          assertEquals(
+            result,
+            Left(IdTokenVerifier.Error.ClientIdDoesNotMatch)
           )
         }
     }
@@ -275,6 +306,8 @@ object IdTokenVerifierTest {
         "{\"aud\":\"https://example.com/path\",\"azp\":\"integration-tests@chingor-test.iam.gserviceaccount.com\",\"email\":\"integration-tests@chingor-test.iam.gserviceaccount.com\",\"email_verified\":true,\"exp\":1587629888,\"iat\":1587626288,\"iss\":\"https://accounts.google.com\",\"sub\":\"104029292853099978293\"}",
         "{\"aud\":\"https://example.com/path\",\"azp\":\"integration-tests@chingor-test.iam.gserviceaccount.com\",\"email\":\"integration-tests@chingor-test.iam.gserviceaccount.com\",\"email_verified\":true,\"exp\":1587629888,\"iat\":1587626288,\"iss\":\"https://thisisnotgoogle.com\",\"sub\":\"104029292853099978293\"}"
       )
+
+    val clientId = ClientId("https://example.com/path")
 
     val decodedIdTokenClaims =
       List(

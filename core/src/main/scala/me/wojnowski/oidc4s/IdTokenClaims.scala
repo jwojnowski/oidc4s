@@ -1,6 +1,8 @@
 package me.wojnowski.oidc4s
 
 import cats.Eq
+import cats.syntax.all._
+import me.wojnowski.oidc4s.IdTokenClaims._
 
 import java.time.Instant
 
@@ -15,40 +17,51 @@ case class IdTokenClaims(
   authenticationContextClassReference: Option[AuthenticationContextClassReference] = None,
   authenticationMethodsReference: List[AuthenticationMethodReference] = List.empty,
   authorizedParty: Option[AuthorizedParty] = None
-)
+) {
 
-case class Subject(value: String) extends AnyVal
+  def matchesClientId(clientId: ClientId): Boolean =
+    authorizedParty match {
+      case Some(AuthorizedParty(value)) => value === clientId.value
+      case None                         => audience.map(_.value).contains(clientId.value)
+    }
 
-object Subject {
-  implicit val eq: Eq[Subject] = Eq.by(_.value)
 }
 
-case class Audience(value: String) extends AnyVal
+object IdTokenClaims {
+  case class Subject(value: String) extends AnyVal
 
-object Audience {
-  implicit val eq: Eq[Audience] = Eq.by(_.value)
-}
+  object Subject {
+    implicit val eq: Eq[Subject] = Eq.by(_.value)
+  }
 
-case class Nonce(value: String) extends AnyVal
+  case class Audience(value: String) extends AnyVal
 
-object Nonce {
-  implicit val eq: Eq[Nonce] = Eq.by(_.value)
-}
+  object Audience {
+    implicit val eq: Eq[Audience] = Eq.by(_.value)
+  }
 
-case class AuthorizedParty(value: String) extends AnyVal
+  case class Nonce(value: String) extends AnyVal
 
-object AuthorizedParty {
-  implicit val eq: Eq[AuthorizedParty] = Eq.by(_.value)
-}
+  object Nonce {
+    implicit val eq: Eq[Nonce] = Eq.by(_.value)
+  }
 
-case class AuthenticationContextClassReference(value: String) extends AnyVal
+  case class AuthorizedParty(value: String) extends AnyVal
 
-object AuthenticationContextClassReference {
-  implicit val eq: Eq[AuthenticationContextClassReference] = Eq.by(_.value)
-}
+  object AuthorizedParty {
+    implicit val eq: Eq[AuthorizedParty] = Eq.by(_.value)
+  }
 
-case class AuthenticationMethodReference(value: String) extends AnyVal
+  case class AuthenticationContextClassReference(value: String) extends AnyVal
 
-object AuthenticationMethodReference {
-  implicit val eq: Eq[AuthenticationMethodReference] = Eq.by(_.value)
+  object AuthenticationContextClassReference {
+    implicit val eq: Eq[AuthenticationContextClassReference] = Eq.by(_.value)
+  }
+
+  case class AuthenticationMethodReference(value: String) extends AnyVal
+
+  object AuthenticationMethodReference {
+    implicit val eq: Eq[AuthenticationMethodReference] = Eq.by(_.value)
+  }
+
 }
