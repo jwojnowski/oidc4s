@@ -1,4 +1,4 @@
-package me.wojnowski.oids4s.json.circe
+package me.wojnowski.oidc4s.json.circe
 
 import cats.syntax.all._
 import io.circe.Decoder

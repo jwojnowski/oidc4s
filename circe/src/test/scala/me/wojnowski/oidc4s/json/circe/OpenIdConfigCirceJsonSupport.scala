@@ -2,7 +2,7 @@ package me.wojnowski.oidc4s.json.circe
 
 import me.wojnowski.oidc4s.Issuer
 import me.wojnowski.oidc4s.config
-import me.wojnowski.oids4s.json.circe.CirceJsonSupport
+import me.wojnowski.oidc4s.json.circe.CirceJsonSupport
 import munit.FunSuite
 
 import scala.io.Source

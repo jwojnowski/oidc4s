@@ -13,7 +13,7 @@ import me.wojnowski.oidc4s.config.OpenIdConfig
 import me.wojnowski.oidc4s.config.OpenIdConnectDiscovery
 import me.wojnowski.oidc4s.impure.AtomicRefCache
 import me.wojnowski.oidc4s.transport.sttp.SttpTransport
-import me.wojnowski.oids4s.json.circe.CirceJsonSupport
+import me.wojnowski.oidc4s.json.circe.CirceJsonSupport
 import sttp.client3.SttpBackend
 
 import scala.concurrent.duration.FiniteDuration

@@ -3,7 +3,7 @@ package me.wojnowski.oidc4s.json.circe
 import me.wojnowski.oidc4s.IdTokenClaims._
 import me.wojnowski.oidc4s.IdTokenClaims
 import me.wojnowski.oidc4s.Issuer
-import me.wojnowski.oids4s.json.circe.CirceJsonSupport
+import me.wojnowski.oidc4s.json.circe.CirceJsonSupport
 import munit.FunSuite
 
 import java.time.Instant
