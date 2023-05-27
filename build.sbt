@@ -40,7 +40,7 @@ lazy val Versions = new {
 
   val sttp = "3.8.15"
 
-  val jwtScala = "9.1.2"
+  val jwtScala = "9.3.0"
 
   val mUnit = "0.7.29"
   val mUnitCatsEffect = "1.0.7"
