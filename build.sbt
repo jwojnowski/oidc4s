@@ -36,7 +36,7 @@ lazy val Versions = new {
     val effect = "3.4.4"
   }
 
-  val circe = "0.14.3"
+  val circe = "0.14.5"
 
   val sttp = "3.7.6"
 
