@@ -28,7 +28,9 @@ trait IdTokenVerifier[F[_]] {
   /** Verifies a token is valid. Returns standard Open ID Token claims. Client ID must be checked manually. */
   def verifyAndDecode(rawToken: String): F[Either[IdTokenVerifier.Error, IdTokenClaims]]
 
-  /** Verifies a token is valid. Returns `IdTokenVerifier.Result`, which includes standard Open ID Token claims and raw header and claims JSONs */
+  /** Verifies a token is valid. Returns `IdTokenVerifier.Result`, which includes standard Open ID Token claims and raw header and claims
+    * JSONs
+    */
   def verifyAndDecodeFullResult(rawToken: String): F[Either[IdTokenVerifier.Error, IdTokenVerifier.Result]]
 
 }

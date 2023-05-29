@@ -7,7 +7,7 @@ import munit.FunSuite
 
 class JwksCirceJsonSupportTest extends FunSuite {
   test("JsonWebKeySet decoding") {
-    //language=JSON
+    // language=JSON
     val rawJson =
       """
          {
