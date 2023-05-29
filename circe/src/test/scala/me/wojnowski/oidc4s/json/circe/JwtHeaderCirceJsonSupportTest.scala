@@ -6,7 +6,7 @@ import pdi.jwt.JwtHeader
 
 class JwtHeaderCirceJsonSupportTest extends FunSuite {
   test("JwtHeader is decoding") {
-    //language=JSON
+    // language=JSON
     val rawJson = """{"kid":"thisiskeyid","alg":"RS256"}"""
 
     val result = CirceJsonSupport.jwtHeaderDecoder.decode(rawJson)

@@ -9,7 +9,9 @@ abstract sealed case class Location(url: String)
 object Location {
 
   // TODO Think about using cats-parse or refined
-  /** @param raw Base address of Open ID provider, e.g. "https://accounts.google.com", "https://appleid.apple.com" or "https://yourdomain.eu.auth0.com"
+  /** @param raw
+    *   Base address of Open ID provider, e.g. "https://accounts.google.com", "https://appleid.apple.com" or
+    *   "https://yourdomain.eu.auth0.com"
     */
   def create(raw: String): Either[Error.InvalidLocation, Location] =
     for {
