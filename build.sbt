@@ -1,7 +1,5 @@
-ThisBuild / scalaVersion := "2.13.8"
-
-val Scala213 = "2.13.10"
-val Scala3 = "3.2.2"
+val Scala213 = "2.13.11"
+val Scala3 = "3.3.0"
 
 ThisBuild / scalaVersion := Scala213
 ThisBuild / crossScalaVersions := Seq(Scala213, Scala3)
@@ -40,7 +38,7 @@ lazy val Versions = new {
 
   val sttp = "3.8.15"
 
-  val jwtScala = "9.3.0"
+  val jwtScala = "9.4.0"
 
   val mUnit = "0.7.29"
   val mUnitCatsEffect = "1.0.7"
