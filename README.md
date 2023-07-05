@@ -35,8 +35,8 @@ import me.wojnowski.oidc4s.IdTokenVerifier
 import me.wojnowski.oidc4s.config.Location
 
 for {
-  location <- Sync[F].fromEither(Location.create("https://accounts.google.com"))
-  backend <- AsyncHttpClientCatsBackend[F]() // from async-http-client-backend-cats
+  location        <- Sync[F].fromEither(Location.create("https://accounts.google.com"))
+  backend         <- AsyncHttpClientCatsBackend[F]() // from async-http-client-backend-cats
   idTokenVerifier <- SttpCirceIdTokenVerifier.cachedWithCatsRef(location)(backend)
 } yield idTokenVerifier
 ```
@@ -76,46 +76,45 @@ val rawToken: String = "eyJhdWQ..."
 val result: F[Either[IdTokenVerifier.Error, Subject]] = verifier.verify(rawToken, clientId)
 ```
 
-## Token verification
+## Token verification and decoding
 
-There are a few verification methods. Depending on level of details, you can choose only to
-verify a token is valid and matches the client ID. The method returns `Subject` (usually some kind of user ID):
+There are a few verification methods. Choosing one mostly comes down to which claims need to be decoded.
+
+### Subject only (`verify`)
+To just verify a token is valid and matches the client ID use `verify` method. It returns `Subject` (usually some kind of user ID):
 
 ```scala
 def verify(rawToken: String, expectedClientId: ClientId): F[Either[IdTokenVerifier.Error, IdTokenClaims.Subject]]
 ```
 
-If more information is needed, a version with all standard ID token claims can be used
-(client ID must be verified manually):
+### Standard claims (`verifyAndDecode`)
+When more information is needed, a version with standard ID token claims can be used.
 
 ```scala
 def verifyAndDecode(rawToken: String): F[Either[IdTokenVerifier.Error, IdTokenClaims]]
 ```
 
-or with full result, which also contains header and claims JSONs (e.g. for decoding non-standard ID token fields).
+### Custom claims (`verifyAndDecodeCustom[A]`)
+For full flexibility, `verifyAndDecodeCustom` method can be used. It requires `ClaimsDecoder[A]` instance, which
+can be derived from JSON-library-specific decoder (see below for Circe example). 
 
 ```scala
-def verifyAndDecodeFullResult(rawToken: String): F[Either[IdTokenVerifier.Error, IdTokenVerifier.Result]]
+def verifyAndDecodeCustom[A](rawToken: String)(implicit decoder: ClaimsDecoder[A]): F[Either[IdTokenVerifier.Error, A]]
+```
+#### Circe Example
+```scala
+case class CustomData(email: String, isAdmin: Boolean)
+implicit val decoder: io.circe.Decoder[CustomData] = io.circe.generic.semiauto.deriveDecoder
+
+import CirceJsonSupport._ // brings ClaimsDecoder[A: Decoder] instance into scope
+
+val verifier: IdTokenVerifier[F] = ...
+val rawToken: String = ...
+
+val result: F[Either[IdTokenVerifier.Error, CustomData]] = verifier.verifyAndDecodeCustom[CustomData](rawToken)
+
 ```
 
-Full Result example:
-
-```
-Right(
-  IdTokenVerifier.Result(
-    rawHeaderJson = """{"alg":"RS256","kid":"f9d97b4cae90bcd76aeb20026f6b770cac221783","typ":"JWT"}""",
-    rawClaimsJson = """{"aud":"https://example.com/path","azp":"integration-tests@chingor-test.iam.gserviceaccount.com","email":"integration-tests@chingor-test.iam.gserviceaccount.com","email_verified":true,"exp":1587629888,"iat":1587626288,"iss":"https://accounts.google.com","sub":"104029292853099978293"}"""
-    IdTokenClaims(
-      issuer = Issuer(https://accounts.google.com),
-      subject = Subject(112741830942876971457),
-      audience = Set(Audience(407408718192.apps.googleusercontent.com)),
-      expiration = 2022-09-18T12:40:09Z, // java.time.Instant
-      issuedAt = 2022-09-18T11:40:09Z, // java.time.Instant
-      authorizedParty = Some(AuthorizedParty(407408718192.apps.googleusercontent.com))
-    )
-  )
-)
-```
 
 ## Configuration Discovery (and caching)
 
