@@ -1,9 +1,10 @@
 package me.wojnowski.oidc4s.json.circe
 
+import io.circe.Decoder
 import me.wojnowski.oidc4s.IdTokenClaims._
 import me.wojnowski.oidc4s.IdTokenClaims
 import me.wojnowski.oidc4s.Issuer
-import me.wojnowski.oidc4s.json.circe.CirceJsonSupport
+import me.wojnowski.oidc4s.json.JsonDecoder.ClaimsDecoder
 import munit.FunSuite
 
 import java.time.Instant
@@ -93,5 +94,18 @@ class IdTokenClaimsCirceJsonSupportTest extends FunSuite {
     val result = CirceJsonSupport.idTokenDecoder.decode(rawJson)
 
     assert(result.isLeft)
+  }
+
+  test("Custom claims (with Issuer) decoding") {
+    import CirceJsonSupport._
+
+    case class CustomClaims(foo: String, bar: Int)
+    implicit val decoder: Decoder[CustomClaims] = Decoder.forProduct2[CustomClaims, String, Int]("foo", "bar")(CustomClaims.apply)
+
+    val rawJson = """{"foo": "Foo", "bar": 12, "additionalField": "doesn't matter", "iss": "https://example.com"}"""
+
+    val result = ClaimsDecoder[CustomClaims].decode(rawJson)
+
+    assertEquals(result, Right((CustomClaims(foo = "Foo", bar = 12), Issuer("https://example.com"))))
   }
 }

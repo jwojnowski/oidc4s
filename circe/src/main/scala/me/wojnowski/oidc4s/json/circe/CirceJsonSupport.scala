@@ -4,9 +4,11 @@ import cats.syntax.all._
 import io.circe.Decoder
 import io.circe.parser
 import me.wojnowski.oidc4s.IdTokenClaims
+import me.wojnowski.oidc4s.Issuer
 import me.wojnowski.oidc4s.PublicKeyProvider
 import me.wojnowski.oidc4s.config.OpenIdConfig
 import me.wojnowski.oidc4s.json.JsonDecoder
+import me.wojnowski.oidc4s.json.JsonDecoder.ClaimsDecoder
 import me.wojnowski.oidc4s.json.JsonSupport
 import pdi.jwt.JwtHeader
 
@@ -25,8 +27,18 @@ trait CirceJsonSupport
 
   override implicit val jwksDecoder: JsonDecoder[PublicKeyProvider.JsonWebKeySet] = fromCirce
 
+  implicit def claimsDecoder[A: Decoder]: ClaimsDecoder[A] = fromCirce
+
   private def fromCirce[A: Decoder]: JsonDecoder[A] =
     (raw: String) => parser.decode[A](raw).leftMap(_.getMessage)
+
+  private implicit def issuerAndCirceDecoder[A: Decoder]: Decoder[(A, Issuer)] =
+    Decoder.instance { hCursor =>
+      (
+        Decoder[A].tryDecode(hCursor),
+        Decoder[Issuer].tryDecode(hCursor.downField("iss"))
+      ).tupled
+    }
 
 }
 

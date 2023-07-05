@@ -15,6 +15,7 @@ import me.wojnowski.oidc4s.TimeUtils.InstantToFiniteDuration
 import me.wojnowski.oidc4s.config.Location
 import me.wojnowski.oidc4s.config.OpenIdConfig
 import me.wojnowski.oidc4s.config.OpenIdConnectDiscovery
+import me.wojnowski.oidc4s.json.JsonDecoder
 import me.wojnowski.oidc4s.mocks.CacheMock
 import me.wojnowski.oidc4s.mocks.HttpTransportMock
 import me.wojnowski.oidc4s.mocks.JsonSupportMock
@@ -67,15 +68,53 @@ class IdTokenVerifierTest extends CatsEffectSuite {
         }
     }
   }
-  test("Claim decoding") {
+
+  test("Custom claim decoding (correct issuer)") {
     runAtInstant(idTokenExpiration.minusSeconds(3)) {
+      case class CustomClaims(email: String, email_verified: Boolean)
+
+      val expectedCustomClaims = CustomClaims(email = "integration-tests@chingor-test.iam.gserviceaccount.com", email_verified = true)
+
+      implicit val jsonDecoder: JsonDecoder[(CustomClaims, Issuer)] = (rawClaims: String) =>
+        if (rawClaims === rawIdTokenClaims.head) {
+          Right(expectedCustomClaims, decodedIdTokenClaims.head.issuer)
+        } else {
+          Left("Could not decode claims")
+        }
+
       IdTokenVerifier
         .create[IO](staticKeyProvider(googleKeys), discovery, jsonSupport)
-        .verifyAndDecodeFullResult(rawIdToken)
+        .verifyAndDecodeCustom[CustomClaims](rawIdToken)
         .map { result =>
           assertEquals(
             result,
-            Right(IdTokenVerifier.Result(rawJwtHeaders.apply(0), rawIdTokenClaims.apply(0), decodedIdTokenClaims.apply(0)))
+            Right(expectedCustomClaims)
+          )
+        }
+    }
+  }
+
+  test("Custom claim decoding (incorrect issuer)") {
+    runAtInstant(idTokenExpiration.minusSeconds(3)) {
+      case class CustomClaims(email: String, email_verified: Boolean)
+
+      val expectedCustomClaims = CustomClaims(email = "integration-tests@chingor-test.iam.gserviceaccount.com", email_verified = true)
+      val unexpectedIssuer = Issuer("https://spanish-inquisition.example.com")
+
+      implicit val jsonDecoder: JsonDecoder[(CustomClaims, Issuer)] = (rawClaims: String) =>
+        if (rawClaims === rawIdTokenClaims.head) {
+          Right(expectedCustomClaims, unexpectedIssuer)
+        } else {
+          Left("Could not decode claims")
+        }
+
+      IdTokenVerifier
+        .create[IO](staticKeyProvider(googleKeys), discovery, jsonSupport)
+        .verifyAndDecodeCustom[CustomClaims](rawIdToken)
+        .map { result =>
+          assertEquals(
+            result,
+            Left(UnexpectedIssuer(found = unexpectedIssuer, decodedIdTokenClaims.head.issuer))
           )
         }
     }
