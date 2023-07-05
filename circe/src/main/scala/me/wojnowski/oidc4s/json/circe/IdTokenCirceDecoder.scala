@@ -7,9 +7,7 @@ import me.wojnowski.oidc4s.Issuer
 
 import java.time.Instant
 
-trait IdTokenCirceDecoder {
-  private implicit val issuerDecoder: Decoder[Issuer] =
-    Decoder[String].map(Issuer.apply)
+trait IdTokenCirceDecoder extends IssuerCirceDecoder {
   private implicit val subjectDecoder: Decoder[Subject] =
     Decoder[String].map(Subject.apply)
   private implicit val audienceDecoder: Decoder[Audience] =

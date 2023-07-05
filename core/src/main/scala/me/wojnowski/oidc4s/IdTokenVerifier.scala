@@ -8,6 +8,7 @@ import me.wojnowski.oidc4s.IdTokenVerifier.Error.CouldNotExtractKeyId
 import me.wojnowski.oidc4s.IdTokenVerifier.Error.JwtVerificationError
 import me.wojnowski.oidc4s.config.OpenIdConnectDiscovery
 import me.wojnowski.oidc4s.json.JsonDecoder
+import me.wojnowski.oidc4s.json.JsonDecoder.ClaimsDecoder
 import me.wojnowski.oidc4s.json.JsonSupport
 import pdi.jwt.Jwt
 import pdi.jwt.JwtAlgorithm
@@ -28,10 +29,9 @@ trait IdTokenVerifier[F[_]] {
   /** Verifies a token is valid. Returns standard Open ID Token claims. Client ID must be checked manually. */
   def verifyAndDecode(rawToken: String): F[Either[IdTokenVerifier.Error, IdTokenClaims]]
 
-  /** Verifies a token is valid. Returns `IdTokenVerifier.Result`, which includes standard Open ID Token claims and raw header and claims
-    * JSONs
+  /** Verifies a token is valid. Returns custom type decoded using provided decoder.
     */
-  def verifyAndDecodeFullResult(rawToken: String): F[Either[IdTokenVerifier.Error, IdTokenVerifier.Result]]
+  def verifyAndDecodeCustom[A](rawToken: String)(implicit decoder: ClaimsDecoder[A]): F[Either[IdTokenVerifier.Error, A]]
 
 }
 
@@ -51,9 +51,9 @@ object IdTokenVerifier {
         verifyAndDecode(rawToken).map(_.ensure(Error.ClientIdDoesNotMatch)(_.matchesClientId(expectedClientId)).map(_.subject))
 
       override def verifyAndDecode(rawToken: String): F[Either[IdTokenVerifier.Error, IdTokenClaims]] =
-        verifyAndDecodeFullResult(rawToken).map(_.map(_.decodedClaims))
+        verifyAndDecodeCustom[IdTokenClaims](rawToken)(JsonDecoder[IdTokenClaims].decode(_).map(result => (result, result.issuer)))
 
-      override def verifyAndDecodeFullResult(rawToken: String): F[Either[IdTokenVerifier.Error, IdTokenVerifier.Result]] = {
+      override def verifyAndDecodeCustom[A](rawToken: String)(implicit decoder: ClaimsDecoder[A]): F[Either[IdTokenVerifier.Error, A]] = {
         for {
           config     <- EitherT(discovery.getConfig).leftMap(IdTokenVerifier.Error.CouldNotDiscoverConfig.apply)
           instant    <- EitherT.liftF(Clock[F].realTimeInstant)
@@ -61,30 +61,29 @@ object IdTokenVerifier {
           headerJson <- EitherT.fromEither(extractHeaderJson(rawToken))
           kid        <- EitherT.fromEither(extractKid(headerJson))
           publicKey  <- EitherT(publicKeyProvider.getKey(kid).map(_.leftMap(IdTokenVerifier.Error.CouldNotFindPublicKey.apply)))
-          result     <- EitherT.fromEither(decodeAndVerifyToken(rawToken, javaClock, publicKey, config.issuer)).map {
-                          case (decodedClaims, claimsJson) =>
-                            Result(headerJson, claimsJson, decodedClaims)
+          result     <- EitherT.fromEither {
+                          decodeAndVerifyToken[(A, Issuer)](rawToken, javaClock, publicKey)
+                            .flatMap { case (claims, issuer) =>
+                              ensureExpectedIssuer(issuer, config.issuer).as(claims)
+                            }
                         }
         } yield result
       }.value
 
-      private def decodeAndVerifyToken(
+      private def decodeAndVerifyToken[A: JsonDecoder](
         rawToken: String,
         javaClock: JavaClock,
-        publicKey: PublicKey,
-        expectedIssuer: Issuer
-      ): Either[Error, (IdTokenClaims, String)] =
+        publicKey: PublicKey
+      ): Either[Error, A] =
         Jwt(javaClock)
           .decodeRaw(rawToken, publicKey, supportedAlgorithms)
           .toEither
           .leftMap[Error](throwable => JwtVerificationError(throwable))
           .flatMap { rawClaims =>
-            JsonDecoder[IdTokenClaims]
+            JsonDecoder[A]
               .decode(rawClaims)
               .leftMap(IdTokenVerifier.Error.CouldNotDecodeClaim.apply)
-              .map((_, rawClaims))
           }
-          .flatTap { case (idTokenClaims, _) => ensureExpectedIssuer(idTokenClaims.issuer, expectedIssuer) }
 
       private def ensureExpectedIssuer(tokenIssuer: Issuer, expectedIssuer: Issuer): Either[Error.UnexpectedIssuer, Unit] =
         Either.cond(expectedIssuer === tokenIssuer, (), IdTokenVerifier.Error.UnexpectedIssuer(tokenIssuer, expectedIssuer))
@@ -105,8 +104,6 @@ object IdTokenVerifier {
         }.toEither.leftMap(_ => Error.CouldNotExtractHeader)
 
     }
-
-  case class Result(rawHeaderJson: String, rawClaimsJson: String, decodedClaims: IdTokenClaims)
 
   sealed trait Error extends ProductSerializableNoStackTrace
 
