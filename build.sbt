@@ -53,7 +53,8 @@ lazy val core = (project in file("core")).settings(
     libraryDependencies += "com.github.jwt-scala" %% "jwt-core" % Versions.jwtScala,
     libraryDependencies += "org.scalameta" %% "munit" % Versions.mUnit % Test,
     libraryDependencies += "org.typelevel" %% "munit-cats-effect-3" % Versions.mUnitCatsEffect % Test,
-    libraryDependencies += "org.typelevel" %% "cats-effect-testkit" % Versions.cats.effect % Test
+    libraryDependencies += "org.typelevel" %% "cats-effect-testkit" % Versions.cats.effect % Test,
+    libraryDependencies += "ch.qos.logback" % "logback-core" % "1.2.3" // FIXME!
   )
 )
 
