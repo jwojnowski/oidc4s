@@ -9,7 +9,7 @@ Apple, Auth0, Okta.
 Combined with [OAuth 2.0 Authorization Code](https://oauth.net/2/grant-types/authorization-code/) flow with [PKCE](https://oauth.net/2/pkce/)
 on front-end side can lead to a simple, yet secure authentication for Single Page Applications.
 
-Scala versions 3.1 and 2.13 are supported.
+Scala versions 3.x and 2.13.x are supported.
 
 [JWT Scala](https://github.com/jwt-scala/jwt-scala) is used for JWT verification under-the-hood. 
 
