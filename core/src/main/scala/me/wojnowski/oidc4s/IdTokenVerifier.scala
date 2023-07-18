@@ -2,8 +2,10 @@ package me.wojnowski.oidc4s
 
 import cats.Monad
 import cats.data.EitherT
+import cats.data.NonEmptySet
 import cats.effect.Clock
 import cats.syntax.all._
+import me.wojnowski.oidc4s.IdTokenClaims.Audience
 import me.wojnowski.oidc4s.IdTokenVerifier.Error.CouldNotExtractKeyId
 import me.wojnowski.oidc4s.IdTokenVerifier.Error.JwtVerificationError
 import me.wojnowski.oidc4s.config.OpenIdConnectDiscovery
@@ -33,6 +35,11 @@ trait IdTokenVerifier[F[_]] {
     */
   def verifyAndDecodeCustom[A](rawToken: String)(implicit decoder: ClaimsDecoder[A]): F[Either[IdTokenVerifier.Error, A]]
 
+  /** Verifies a token is valid and has been issued for a particular client ID. Returns custom type decoded using provided decoder.
+    */
+  def verifyAndDecodeCustom[A](rawToken: String, expectedClientId: ClientId)(implicit decoder: ClaimsDecoder[A])
+    : F[Either[IdTokenVerifier.Error, A]]
+
 }
 
 object IdTokenVerifier {
@@ -51,9 +58,23 @@ object IdTokenVerifier {
         verifyAndDecode(rawToken).map(_.ensure(Error.ClientIdDoesNotMatch)(_.matchesClientId(expectedClientId)).map(_.subject))
 
       override def verifyAndDecode(rawToken: String): F[Either[IdTokenVerifier.Error, IdTokenClaims]] =
-        verifyAndDecodeCustom[IdTokenClaims](rawToken)(JsonDecoder[IdTokenClaims].decode(_).map(result => (result, result.issuer)))
+        verifyAndDecodeCustom[IdTokenClaims](rawToken)(JsonDecoder[IdTokenClaims].decode(_).map(result => (result, result)))
 
-      override def verifyAndDecodeCustom[A](rawToken: String)(implicit decoder: ClaimsDecoder[A]): F[Either[IdTokenVerifier.Error, A]] = {
+      override def verifyAndDecodeCustom[A](rawToken: String)(implicit decoder: ClaimsDecoder[A]): F[Either[Error, A]] =
+        internalVerifyAndDecode(rawToken, _ => Either.unit)
+
+      override def verifyAndDecodeCustom[A](rawToken: String, expectedClientId: ClientId)(implicit decoder: ClaimsDecoder[A])
+        : F[Either[IdTokenVerifier.Error, A]] =
+        internalVerifyAndDecode(
+          rawToken,
+          claims => Either.cond(claims.matchesClientId(expectedClientId), (), IdTokenVerifier.Error.ClientIdDoesNotMatch)
+        )
+
+      private def internalVerifyAndDecode[A](
+        rawToken: String,
+        standardClaimsCheck: IdTokenClaims => Either[IdTokenVerifier.Error, Unit]
+      )(implicit decoder: ClaimsDecoder[A]
+      ): F[Either[IdTokenVerifier.Error, A]] = {
         for {
           config     <- EitherT(discovery.getConfig).leftMap(IdTokenVerifier.Error.CouldNotDiscoverConfig.apply)
           instant    <- EitherT.liftF(Clock[F].realTimeInstant)
@@ -62,9 +83,14 @@ object IdTokenVerifier {
           kid        <- EitherT.fromEither(extractKid(headerJson))
           publicKey  <- EitherT(publicKeyProvider.getKey(kid).map(_.leftMap(IdTokenVerifier.Error.CouldNotFindPublicKey.apply)))
           result     <- EitherT.fromEither {
-                          decodeAndVerifyToken[(A, Issuer)](rawToken, javaClock, publicKey)
-                            .flatMap { case (claims, issuer) =>
-                              ensureExpectedIssuer(issuer, config.issuer).as(claims)
+                          decodeAndVerifyToken[(A, IdTokenClaims)](rawToken, javaClock, publicKey)
+                            .flatMap { case (claims, standardClaims) =>
+                              ensureExpectedIssuer(standardClaims.issuer, config.issuer)
+                                .leftWiden[IdTokenVerifier.Error]
+                                .flatTap { _ =>
+                                  standardClaimsCheck(standardClaims)
+                                }
+                                .as(claims)
                             }
                         }
         } yield result

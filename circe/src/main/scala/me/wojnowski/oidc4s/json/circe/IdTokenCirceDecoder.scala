@@ -1,5 +1,6 @@
 package me.wojnowski.oidc4s.json.circe
 
+import cats.data.NonEmptySet
 import io.circe.Decoder
 import me.wojnowski.oidc4s.IdTokenClaims
 import me.wojnowski.oidc4s.IdTokenClaims._
@@ -7,11 +8,10 @@ import me.wojnowski.oidc4s.Issuer
 
 import java.time.Instant
 
-trait IdTokenCirceDecoder extends IssuerCirceDecoder {
+trait IdTokenCirceDecoder extends IssuerCirceDecoder with AudienceCirceDecoder {
+
   private implicit val subjectDecoder: Decoder[Subject] =
     Decoder[String].map(Subject.apply)
-  private implicit val audienceDecoder: Decoder[Audience] =
-    Decoder[String].map(Audience.apply)
   private implicit val nonceDecoder: Decoder[Nonce] =
     Decoder[String].map(Nonce.apply)
   private implicit val accrDecoder: Decoder[AuthenticationContextClassReference] =
@@ -26,7 +26,7 @@ trait IdTokenCirceDecoder extends IssuerCirceDecoder {
       IdTokenClaims,
       Issuer,
       Subject,
-      Either[Audience, Set[Audience]],
+      NonEmptySet[Audience],
       Long,
       Long,
       Option[Long],
@@ -49,7 +49,7 @@ trait IdTokenCirceDecoder extends IssuerCirceDecoder {
       (
         issuer: Issuer,
         subject: Subject,
-        audience: Either[Audience, Set[Audience]],
+        audience: NonEmptySet[Audience],
         expiration: Long,
         issuedAt: Long,
         authenticationTime: Option[Long],
@@ -61,7 +61,7 @@ trait IdTokenCirceDecoder extends IssuerCirceDecoder {
         IdTokenClaims(
           issuer = issuer,
           subject = subject,
-          audience = audience.fold(Set(_), identity),
+          audience = audience,
           expiration = Instant.ofEpochSecond(expiration),
           issuedAt = Instant.ofEpochSecond(issuedAt),
           authenticationTime = authenticationTime.map(Instant.ofEpochSecond),
@@ -70,16 +70,6 @@ trait IdTokenCirceDecoder extends IssuerCirceDecoder {
           authenticationMethodsReference = authenticationMethodsReference.getOrElse(List.empty),
           authorizedParty = authenticationParty
         )
-    }
-
-  private implicit def fallbackEitherDecoder[A: Decoder, B: Decoder]: Decoder[Either[A, B]] =
-    Decoder.instance { hCursor =>
-      hCursor.as[A] match {
-        case Left(_)       =>
-          hCursor.as[B].map(Right(_))
-        case Right(string) =>
-          Right(Left(string))
-      }
     }
 
 }

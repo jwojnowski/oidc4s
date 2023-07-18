@@ -1,9 +1,11 @@
 package me.wojnowski.oidc4s.json.circe
 
+import cats.data.NonEmptySet
 import cats.syntax.all._
 import io.circe.Decoder
 import io.circe.parser
 import me.wojnowski.oidc4s.IdTokenClaims
+import me.wojnowski.oidc4s.IdTokenClaims.Audience
 import me.wojnowski.oidc4s.Issuer
 import me.wojnowski.oidc4s.PublicKeyProvider
 import me.wojnowski.oidc4s.config.OpenIdConfig
@@ -32,11 +34,11 @@ trait CirceJsonSupport
   private def fromCirce[A: Decoder]: JsonDecoder[A] =
     (raw: String) => parser.decode[A](raw).leftMap(_.getMessage)
 
-  private implicit def issuerAndCirceDecoder[A: Decoder]: Decoder[(A, Issuer)] =
+  private implicit def issuerAudienceAndCirceDecoder[A: Decoder]: Decoder[(A, IdTokenClaims)] =
     Decoder.instance { hCursor =>
       (
         Decoder[A].tryDecode(hCursor),
-        Decoder[Issuer].tryDecode(hCursor.downField("iss"))
+        Decoder[IdTokenClaims].tryDecode(hCursor),
       ).tupled
     }
 

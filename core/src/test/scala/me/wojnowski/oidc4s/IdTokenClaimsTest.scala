@@ -1,5 +1,6 @@
 package me.wojnowski.oidc4s
 
+import cats.data.NonEmptySet
 import me.wojnowski.oidc4s.IdTokenClaims._
 import munit.FunSuite
 
@@ -16,7 +17,7 @@ class IdTokenClaimsTest extends FunSuite {
   test("Authorized Party matches Client ID and it's present in Audience") {
     val claims = createClaims(
       authorizedParty = Some(AuthorizedParty(clientId.value)),
-      audience = Set(Audience(clientId.value), otherAudience)
+      audience = NonEmptySet.of(Audience(clientId.value), otherAudience)
     )
 
     val result = claims.matchesClientId(clientId)
@@ -27,7 +28,7 @@ class IdTokenClaimsTest extends FunSuite {
   test("Authorized Party doesn't match Client ID, but Client ID present in Audience") {
     val claims = createClaims(
       authorizedParty = Some(AuthorizedParty("different-value")),
-      audience = Set(Audience(clientId.value), otherAudience)
+      audience = NonEmptySet.of(Audience(clientId.value), otherAudience)
     )
 
     val result = claims.matchesClientId(clientId)
@@ -42,7 +43,7 @@ class IdTokenClaimsTest extends FunSuite {
   test("Authorized Party matches Client ID, but it's not present in Audience") {
     val claims = createClaims(
       authorizedParty = Some(AuthorizedParty(clientId.value)),
-      audience = Set(otherAudience)
+      audience = NonEmptySet.of(otherAudience)
     )
 
     val result = claims.matchesClientId(clientId)
@@ -53,7 +54,7 @@ class IdTokenClaimsTest extends FunSuite {
   test("No Authorized Party, Client ID present in Audience") {
     val claims = createClaims(
       authorizedParty = None,
-      audience = Set(Audience(clientId.value), otherAudience)
+      audience = NonEmptySet.of(Audience(clientId.value), otherAudience)
     )
 
     val result = claims.matchesClientId(clientId)
@@ -64,7 +65,7 @@ class IdTokenClaimsTest extends FunSuite {
   test("No Authorized Party, Client ID not present in Audience") {
     val claims = createClaims(
       authorizedParty = None,
-      audience = Set(otherAudience)
+      audience = NonEmptySet.one(otherAudience)
     )
 
     val result = claims.matchesClientId(clientId)
@@ -72,6 +73,6 @@ class IdTokenClaimsTest extends FunSuite {
     assertEquals(result, false)
   }
 
-  private def createClaims(authorizedParty: Option[AuthorizedParty], audience: Set[Audience]): IdTokenClaims =
+  private def createClaims(authorizedParty: Option[AuthorizedParty], audience: NonEmptySet[Audience]): IdTokenClaims =
     IdTokenClaims(issuer, subject, audience, expiresIn, issuedAt, authorizedParty = authorizedParty)
 }

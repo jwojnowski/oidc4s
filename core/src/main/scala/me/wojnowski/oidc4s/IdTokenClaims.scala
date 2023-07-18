@@ -1,6 +1,8 @@
 package me.wojnowski.oidc4s
 
+import cats.data.NonEmptySet
 import cats.Eq
+import cats.Order
 import cats.syntax.all._
 import me.wojnowski.oidc4s.IdTokenClaims._
 
@@ -9,7 +11,7 @@ import java.time.Instant
 case class IdTokenClaims(
   issuer: Issuer,
   subject: Subject,
-  audience: Set[Audience],
+  audience: NonEmptySet[Audience],
   expiration: Instant,
   issuedAt: Instant,
   authenticationTime: Option[Instant] = None,
@@ -22,7 +24,7 @@ case class IdTokenClaims(
   def matchesClientId(clientId: ClientId): Boolean =
     authorizedParty match {
       case Some(AuthorizedParty(value)) => value === clientId.value
-      case None                         => audience.map(_.value).contains(clientId.value)
+      case None                         => audience.map(_.value).contains_(clientId.value)
     }
 
 }
@@ -38,6 +40,7 @@ object IdTokenClaims {
 
   object Audience {
     implicit val eq: Eq[Audience] = Eq.by(_.value)
+    implicit val order: Order[Audience] = Order.by(_.value)
   }
 
   case class Nonce(value: String) extends AnyVal

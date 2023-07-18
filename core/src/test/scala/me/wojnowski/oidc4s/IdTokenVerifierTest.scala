@@ -1,6 +1,7 @@
 package me.wojnowski.oidc4s
 
 import cats.Applicative
+import cats.data.NonEmptySet
 import cats.data.NonEmptyVector
 import cats.effect.IO
 import cats.effect.testkit.TestControl
@@ -75,9 +76,9 @@ class IdTokenVerifierTest extends CatsEffectSuite {
 
       val expectedCustomClaims = CustomClaims(email = "integration-tests@chingor-test.iam.gserviceaccount.com", email_verified = true)
 
-      implicit val jsonDecoder: JsonDecoder[(CustomClaims, Issuer)] = (rawClaims: String) =>
+      implicit val jsonDecoder: JsonDecoder[(CustomClaims, IdTokenClaims)] = (rawClaims: String) =>
         if (rawClaims === rawIdTokenClaims.head) {
-          Right(expectedCustomClaims, decodedIdTokenClaims.head.issuer)
+          Right(expectedCustomClaims, decodedIdTokenClaims.head)
         } else {
           Left("Could not decode claims")
         }
@@ -101,9 +102,9 @@ class IdTokenVerifierTest extends CatsEffectSuite {
       val expectedCustomClaims = CustomClaims(email = "integration-tests@chingor-test.iam.gserviceaccount.com", email_verified = true)
       val unexpectedIssuer = Issuer("https://spanish-inquisition.example.com")
 
-      implicit val jsonDecoder: JsonDecoder[(CustomClaims, Issuer)] = (rawClaims: String) =>
+      implicit val jsonDecoder: JsonDecoder[(CustomClaims, IdTokenClaims)] = (rawClaims: String) =>
         if (rawClaims === rawIdTokenClaims.head) {
-          Right(expectedCustomClaims, unexpectedIssuer)
+          Right(expectedCustomClaims, decodedIdTokenClaims.head.copy(issuer = unexpectedIssuer))
         } else {
           Left("Could not decode claims")
         }
@@ -353,14 +354,14 @@ object IdTokenVerifierTest {
         IdTokenClaims(
           issuer = Issuer("https://accounts.google.com"),
           subject = Subject("104029292853099978293"),
-          audience = Set(Audience("https://example.com/path")),
+          audience = NonEmptySet.of(Audience("https://example.com/path")),
           expiration = idTokenExpiration,
           issuedAt = Instant.parse("2020-04-23T07:18:08Z")
         ),
         IdTokenClaims(
           issuer = Issuer("https://thisisnotgoogle.com"),
           subject = Subject("104029292853099978293"),
-          audience = Set(Audience("https://example.com/path")),
+          audience = NonEmptySet.of(Audience("https://example.com/path")),
           expiration = idTokenExpiration,
           issuedAt = Instant.parse("2020-04-23T07:18:08Z")
         )
