@@ -9,7 +9,7 @@ Apple, Auth0, Okta.
 Combined with [OAuth 2.0 Authorization Code](https://oauth.net/2/grant-types/authorization-code/) flow with [PKCE](https://oauth.net/2/pkce/)
 on front-end side can lead to a simple, yet secure authentication for Single Page Applications.
 
-Scala versions 3.1 and 2.13 are supported.
+Scala versions 3.x and 2.13.x are supported.
 
 [JWT Scala](https://github.com/jwt-scala/jwt-scala) is used for JWT verification under-the-hood. 
 
@@ -100,6 +100,10 @@ can be derived from JSON-library-specific decoder (see below for Circe example).
 
 ```scala
 def verifyAndDecodeCustom[A](rawToken: String)(implicit decoder: ClaimsDecoder[A]): F[Either[IdTokenVerifier.Error, A]]
+```
+There is also a version verifying if a token matches client ID:
+```scala
+def verifyAndDecodeCustom[A](rawToken: String, expectedClientId: ClientId)(implicit decoder: ClaimsDecoder[A]): F[Either[IdTokenVerifier.Error, A]]
 ```
 #### Circe Example
 ```scala
