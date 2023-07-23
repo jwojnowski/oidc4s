@@ -121,6 +121,57 @@ class IdTokenVerifierTest extends CatsEffectSuite {
     }
   }
 
+  test("Custom claim decoding (matching Client ID)") {
+    runAtInstant(idTokenExpiration.minusSeconds(3)) {
+      case class CustomClaims(email: String, email_verified: Boolean)
+
+      val expectedCustomClaims = CustomClaims(email = "integration-tests@chingor-test.iam.gserviceaccount.com", email_verified = true)
+
+      implicit val jsonDecoder: JsonDecoder[(CustomClaims, IdTokenClaims)] = (rawClaims: String) =>
+        if (rawClaims === rawIdTokenClaims.head) {
+          Right(expectedCustomClaims, decodedIdTokenClaims.head)
+        } else {
+          Left("Could not decode claims")
+        }
+
+      IdTokenVerifier
+        .create[IO](staticKeyProvider(googleKeys), discovery, jsonSupport)
+        .verifyAndDecodeCustom[CustomClaims](rawIdToken, clientId)
+        .map { result =>
+          assertEquals(
+            result,
+            Right(expectedCustomClaims)
+          )
+        }
+    }
+  }
+
+  test("Custom claim decoding (not matching Client ID)") {
+    runAtInstant(idTokenExpiration.minusSeconds(3)) {
+      case class CustomClaims(email: String, email_verified: Boolean)
+
+      val expectedCustomClaims = CustomClaims(email = "integration-tests@chingor-test.iam.gserviceaccount.com", email_verified = true)
+      val otherClientId = ClientId("other-client-id")
+
+      implicit val jsonDecoder: JsonDecoder[(CustomClaims, IdTokenClaims)] = (rawClaims: String) =>
+        if (rawClaims === rawIdTokenClaims.head) {
+          Right(expectedCustomClaims, decodedIdTokenClaims.head)
+        } else {
+          Left("Could not decode claims")
+        }
+
+      IdTokenVerifier
+        .create[IO](staticKeyProvider(googleKeys), discovery, jsonSupport)
+        .verifyAndDecodeCustom[CustomClaims](rawIdToken, otherClientId)
+        .map { result =>
+          assertEquals(
+            result,
+            Left(IdTokenVerifier.Error.ClientIdDoesNotMatch)
+          )
+        }
+    }
+  }
+
   test("Matching Client ID") {
     runAtInstant(idTokenExpiration.minusSeconds(3)) {
       IdTokenVerifier
