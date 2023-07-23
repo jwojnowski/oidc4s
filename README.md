@@ -101,6 +101,10 @@ can be derived from JSON-library-specific decoder (see below for Circe example).
 ```scala
 def verifyAndDecodeCustom[A](rawToken: String)(implicit decoder: ClaimsDecoder[A]): F[Either[IdTokenVerifier.Error, A]]
 ```
+There is also a version verifying if a token matches client ID:
+```scala
+def verifyAndDecodeCustom[A](rawToken: String, expectedClientId: ClientId)(implicit decoder: ClaimsDecoder[A]): F[Either[IdTokenVerifier.Error, A]]
+```
 #### Circe Example
 ```scala
 case class CustomData(email: String, isAdmin: Boolean)
