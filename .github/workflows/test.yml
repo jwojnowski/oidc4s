@@ -21,5 +21,7 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
+      - name: Sbt Dependency Submission
+        uses: scalacenter/sbt-dependency-submission@v2.2.0
       - name: Compile and test
         run: sbt +test scalafmtCheckAll
