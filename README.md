@@ -2,6 +2,7 @@
 
 [![License](http://img.shields.io/:license-MIT-green.svg)](https://opensource.org/licenses/MIT)
 [![Maven Central](https://img.shields.io/maven-central/v/me.wojnowski/oidc4s-core_3.svg?color=blue)](https://search.maven.org/search?q=oidc4s)
+[![Known Vulnerabilities](https://snyk.io/test/github/jwojnowski/oidc4s/badge.svg)](https://snyk.io/test/github/jwojnowski/oidc4s)
 
 This library can be used to verify and decode ID Tokens from Open ID Connect 1.0 providers like Google, Microsoft,
 Apple, Auth0, Okta.
