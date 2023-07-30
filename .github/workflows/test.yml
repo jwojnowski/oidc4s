@@ -4,10 +4,9 @@ on:
   workflow_dispatch:
   push:
     tags-ignore:
-      - "*"
+      - "v*"
     branches:
-      - "*"
-  pull_request:
+      - "**"
 
 jobs:
 
