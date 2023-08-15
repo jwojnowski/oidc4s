@@ -30,7 +30,7 @@ val commonSettings = Seq(
 lazy val Versions = new {
 
   val cats = new {
-    val core = "2.9.0"
+    val core = "2.10.0"
     val effect = "3.5.1"
   }
 
