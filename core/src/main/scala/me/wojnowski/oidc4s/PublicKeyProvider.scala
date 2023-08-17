@@ -1,5 +1,6 @@
 package me.wojnowski.oidc4s
 
+import cats.Applicative
 import cats.Monad
 import cats.data.EitherT
 import cats.syntax.all._
@@ -30,8 +31,47 @@ object PublicKeyProvider {
 
   private val rsaKeyFactory = KeyFactory.getInstance("RSA")
 
+  def static[F[_]: Applicative](publicKeys: Map[KeyId, PublicKey]): PublicKeyProvider[F] =
+    new PublicKeyProvider[F] {
+      override def getKey(keyId: KeyId): F[Either[Error, PublicKey]] =
+        publicKeys.get(keyId).toRight(Error.CouldNotFindPublicKey(keyId): Error).pure[F]
+
+      override def getAllKeys: F[Either[Error, KeyMap]] =
+        publicKeys.asRight[Error].pure[F]
+    }
+
+  def staticPem[F[_]: Applicative](publicPemKeys: Map[KeyId, String]): Either[Error.CouldNotDecodePublicKey, PublicKeyProvider[F]] =
+    publicPemKeys
+      .toList
+      .traverse { case (keyId, key) => KeyUtils.parsePublicPemKey(key).map(keyId -> _) }
+      .map(keyIdToKeyList => static(keyIdToKeyList.toMap))
+
+  @deprecated("Use discovery", "0.11.0")
   def jwks[F[_]: Monad](
     discovery: OpenIdConnectDiscovery[F]
+  )(
+    transport: Transport[F],
+    jsonSupport: JsonSupport
+  ): PublicKeyProvider[F] = this.discovery(discovery)(transport, jsonSupport)
+
+  def discovery[F[_]: Monad](
+    discovery: OpenIdConnectDiscovery[F]
+  )(
+    transport: Transport[F],
+    jsonSupport: JsonSupport
+  ): PublicKeyProvider[F] =
+    jwks(discovery.getConfig.map(_.bimap(CouldNotDiscoverConfig.apply, _.jwksUri)))(transport, jsonSupport)
+
+  def jwks[F[_]: Monad](
+    jwksUri: String
+  )(
+    transport: Transport[F],
+    jsonSupport: JsonSupport
+  ): PublicKeyProvider[F] =
+    jwks(jwksUri.asRight[CouldNotDiscoverConfig].pure[F])(transport, jsonSupport)
+
+  def jwks[F[_]: Monad](
+    jwksUriF: F[Either[CouldNotDiscoverConfig, String]]
   )(
     transport: Transport[F],
     jsonSupport: JsonSupport
@@ -45,11 +85,8 @@ object PublicKeyProvider {
 
       override def getAllKeys: F[Either[Error, KeyMap]] = {
         for {
-          config  <- EitherT(discovery.getConfig).leftMap(CouldNotDiscoverConfig.apply)
-          rawJson <- EitherT(
-                       transport
-                         .get(config.jwksUri)
-                     ).leftMap(Error.CouldNotFetchKeys.apply)
+          jwksUri <- EitherT(jwksUriF)
+          rawJson <- EitherT(transport.get(jwksUri)).leftMap(Error.CouldNotFetchKeys.apply)
           keys    <- EitherT.fromEither {
                        JsonDecoder[JsonWebKeySet]
                          .decode(rawJson.data)
