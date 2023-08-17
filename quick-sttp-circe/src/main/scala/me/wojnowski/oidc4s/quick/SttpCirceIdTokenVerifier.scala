@@ -69,10 +69,10 @@ object SttpCirceIdTokenVerifier {
   )(
     backend: SttpBackend[F, Any]
   ): IdTokenVerifier[F] = {
-    val publicKeyProvider = PublicKeyProvider.jwks(discovery)(SttpTransport.instance(backend), CirceJsonSupport)
+    val publicKeyProvider = PublicKeyProvider.discovery(discovery)(SttpTransport.instance(backend), CirceJsonSupport)
 
     IdTokenVerifier
-      .create[F](
+      .discovery[F](
         publicKeyCache.fold(publicKeyProvider)(PublicKeyProvider.cached(publicKeyProvider, _)),
         discovery,
         CirceJsonSupport

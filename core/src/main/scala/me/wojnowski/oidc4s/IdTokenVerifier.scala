@@ -44,9 +44,35 @@ trait IdTokenVerifier[F[_]] {
 
 object IdTokenVerifier {
 
+  @deprecated("Use instance", "0.11.0")
   def create[F[_]: Monad: Clock](
     publicKeyProvider: PublicKeyProvider[F],
     discovery: OpenIdConnectDiscovery[F],
+    jsonSupport: JsonSupport
+  ): IdTokenVerifier[F] =
+    this.discovery(publicKeyProvider, discovery, jsonSupport)
+
+  def discovery[F[_]: Monad: Clock](
+    publicKeyProvider: PublicKeyProvider[F],
+    discovery: OpenIdConnectDiscovery[F],
+    jsonSupport: JsonSupport
+  ): IdTokenVerifier[F] =
+    instance(
+      publicKeyProvider,
+      issuerF = discovery.getConfig.map(_.bimap(IdTokenVerifier.Error.CouldNotDiscoverConfig.apply, _.issuer)),
+      jsonSupport
+    )
+
+  def static[F[_]: Monad: Clock](publicKeyProvider: PublicKeyProvider[F], issuer: Issuer, jsonSupport: JsonSupport): IdTokenVerifier[F] =
+    instance(
+      publicKeyProvider,
+      issuerF = issuer.asRight[IdTokenVerifier.Error.CouldNotDiscoverConfig].pure[F],
+      jsonSupport
+    )
+
+  def instance[F[_]: Monad: Clock](
+    publicKeyProvider: PublicKeyProvider[F],
+    issuerF: F[Either[IdTokenVerifier.Error.CouldNotDiscoverConfig, Issuer]],
     jsonSupport: JsonSupport
   ): IdTokenVerifier[F] =
     new IdTokenVerifier[F] {
@@ -77,7 +103,7 @@ object IdTokenVerifier {
       )(implicit decoder: ClaimsDecoder[A]
       ): F[Either[IdTokenVerifier.Error, A]] = {
         for {
-          config     <- EitherT(discovery.getConfig).leftMap(IdTokenVerifier.Error.CouldNotDiscoverConfig.apply)
+          issuer     <- EitherT(issuerF)
           instant    <- EitherT.liftF(Clock[F].realTimeInstant)
           javaClock = JavaClock.fixed(instant, ZoneId.of("UTC"))
           headerJson <- EitherT.fromEither(extractHeaderJson(rawToken))
@@ -86,7 +112,7 @@ object IdTokenVerifier {
           result     <- EitherT.fromEither {
                           decodeAndVerifyToken[(A, IdTokenClaims)](rawToken, javaClock, publicKey)
                             .flatMap { case (claims, standardClaims) =>
-                              ensureExpectedIssuer(standardClaims.issuer, config.issuer)
+                              ensureExpectedIssuer(tokenIssuer = standardClaims.issuer, expectedIssuer = issuer)
                                 .leftWiden[IdTokenVerifier.Error]
                                 .flatTap { _ =>
                                   standardClaimsCheck(standardClaims)

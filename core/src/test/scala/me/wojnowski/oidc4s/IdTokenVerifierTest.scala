@@ -50,7 +50,7 @@ class IdTokenVerifierTest extends CatsEffectSuite {
   test("Correct IdentityToken signed with RS256") {
     runAtInstant(idTokenExpiration.minusSeconds(3)) {
       IdTokenVerifier
-        .create[IO](staticKeyProvider(googleKeys), discovery, jsonSupport)
+        .discovery[IO](googleKeyProvider, discovery, jsonSupport)
         .verifyAndDecode(rawIdToken)
         .map { result =>
           assertEquals(result, Right(decodedIdTokenClaims(0)))
@@ -61,7 +61,7 @@ class IdTokenVerifierTest extends CatsEffectSuite {
   test("Expired IdentityToken") {
     runAtInstant(idTokenExpiration.plusSeconds(3)) {
       IdTokenVerifier
-        .create[IO](staticKeyProvider(googleKeys), discovery, jsonSupport)
+        .discovery[IO](googleKeyProvider, discovery, jsonSupport)
         .verifyAndDecode(rawIdToken)
         .map {
           case Left(JwtVerificationError(_: JwtExpirationException)) => ()
@@ -84,7 +84,7 @@ class IdTokenVerifierTest extends CatsEffectSuite {
         }
 
       IdTokenVerifier
-        .create[IO](staticKeyProvider(googleKeys), discovery, jsonSupport)
+        .discovery[IO](googleKeyProvider, discovery, jsonSupport)
         .verifyAndDecodeCustom[CustomClaims](rawIdToken)
         .map { result =>
           assertEquals(
@@ -110,7 +110,7 @@ class IdTokenVerifierTest extends CatsEffectSuite {
         }
 
       IdTokenVerifier
-        .create[IO](staticKeyProvider(googleKeys), discovery, jsonSupport)
+        .discovery[IO](googleKeyProvider, discovery, jsonSupport)
         .verifyAndDecodeCustom[CustomClaims](rawIdToken)
         .map { result =>
           assertEquals(
@@ -135,7 +135,7 @@ class IdTokenVerifierTest extends CatsEffectSuite {
         }
 
       IdTokenVerifier
-        .create[IO](staticKeyProvider(googleKeys), discovery, jsonSupport)
+        .discovery[IO](googleKeyProvider, discovery, jsonSupport)
         .verifyAndDecodeCustom[CustomClaims](rawIdToken, clientId)
         .map { result =>
           assertEquals(
@@ -161,7 +161,7 @@ class IdTokenVerifierTest extends CatsEffectSuite {
         }
 
       IdTokenVerifier
-        .create[IO](staticKeyProvider(googleKeys), discovery, jsonSupport)
+        .discovery[IO](googleKeyProvider, discovery, jsonSupport)
         .verifyAndDecodeCustom[CustomClaims](rawIdToken, otherClientId)
         .map { result =>
           assertEquals(
@@ -175,7 +175,7 @@ class IdTokenVerifierTest extends CatsEffectSuite {
   test("Matching Client ID") {
     runAtInstant(idTokenExpiration.minusSeconds(3)) {
       IdTokenVerifier
-        .create[IO](staticKeyProvider(googleKeys), discovery, jsonSupport)
+        .discovery[IO](googleKeyProvider, discovery, jsonSupport)
         .verify(rawIdToken, clientId)
         .map { result =>
           assertEquals(
@@ -191,7 +191,7 @@ class IdTokenVerifierTest extends CatsEffectSuite {
       val otherClientId = ClientId("other-client-id")
 
       IdTokenVerifier
-        .create[IO](staticKeyProvider(googleKeys), discovery, jsonSupport)
+        .discovery[IO](googleKeyProvider, discovery, jsonSupport)
         .verify(rawIdToken, otherClientId)
         .map { result =>
           assertEquals(
@@ -208,7 +208,7 @@ class IdTokenVerifierTest extends CatsEffectSuite {
 
     runAtInstant(idTokenExpiration.minusSeconds(3)) {
       IdTokenVerifier
-        .create[IO](staticKeyProvider(nonGoogleKeys), discovery, jsonSupport)
+        .discovery[IO](nonGoogleKeyProvider, discovery, jsonSupport)
         .verifyAndDecode(tokenWithOtherIssuer)
         .map {
           case Left(IdTokenVerifier.Error.UnexpectedIssuer(Issuer("https://thisisnotgoogle.com"), issuer)) =>
@@ -225,7 +225,7 @@ class IdTokenVerifierTest extends CatsEffectSuite {
 
     runAtInstant(idTokenExpiration.minusSeconds(3)) {
       IdTokenVerifier
-        .create[IO](staticKeyProvider(googleKeys), discovery, jsonSupport)
+        .discovery[IO](googleKeyProvider, discovery, jsonSupport)
         .verifyAndDecode(tokenSignedWithOtherKey)
         .map {
           case Left(JwtVerificationError(_: JwtValidationException)) => ()
@@ -243,7 +243,7 @@ class IdTokenVerifierTest extends CatsEffectSuite {
 
     runAtInstant(idTokenExpiration.minusSeconds(3)) {
       IdTokenVerifier
-        .create[IO](staticKeyProvider(nonGoogleKeys), discoveryWithDifferentIssuer, jsonSupport)
+        .discovery[IO](nonGoogleKeyProvider, discoveryWithDifferentIssuer, jsonSupport)
         .verifyAndDecode(tokenWithOtherIssuer)
         .map { result =>
           assertEquals(result, Right(decodedIdTokenClaims.apply(1)))
@@ -258,7 +258,7 @@ class IdTokenVerifierTest extends CatsEffectSuite {
 
     runAtInstant(idTokenExpiration.minusSeconds(3)) {
       IdTokenVerifier
-        .create[IO](staticKeyProvider(nonGoogleKeys), discovery, jsonSupport)
+        .discovery[IO](nonGoogleKeyProvider, discovery, jsonSupport)
         .verifyAndDecode(tokenWithoutIssuer)
         .map {
           case Left(IdTokenVerifier.Error.CouldNotDecodeClaim(_)) => ()
@@ -273,7 +273,7 @@ class IdTokenVerifierTest extends CatsEffectSuite {
 
     runAtInstant(idTokenExpiration.minusSeconds(3)) {
       IdTokenVerifier
-        .create[IO](staticKeyProvider(nonGoogleKeys), discovery, jsonSupport)
+        .discovery[IO](nonGoogleKeyProvider, discovery, jsonSupport)
         .verifyAndDecode(tokenWithAlgorithmNone)
         .map {
           case Left(JwtVerificationError(_: JwtEmptySignatureException)) => ()
@@ -288,7 +288,7 @@ class IdTokenVerifierTest extends CatsEffectSuite {
 
     runAtInstant(idTokenExpiration.minusSeconds(3)) {
       IdTokenVerifier
-        .create[IO](staticKeyProvider(nonGoogleKeys), discovery, jsonSupport)
+        .discovery[IO](nonGoogleKeyProvider, discovery, jsonSupport)
         .verifyAndDecode(tokenWithAlgorithmNone)
         .map {
           case Left(JwtVerificationError(_: JwtEmptyAlgorithmException)) => ()
@@ -302,7 +302,7 @@ class IdTokenVerifierTest extends CatsEffectSuite {
 
     runAtInstant(idTokenExpiration.minusSeconds(3)) {
       IdTokenVerifier
-        .create[IO](staticKeyProvider(nonGoogleKeys), discovery, jsonSupport)
+        .discovery[IO](nonGoogleKeyProvider, discovery, jsonSupport)
         .verifyAndDecode(tokenWithHs256Algorithm)
         .map {
           case Left(JwtVerificationError(_: JwtValidationException)) => ()
@@ -327,7 +327,7 @@ class IdTokenVerifierTest extends CatsEffectSuite {
 
           val verifier =
             IdTokenVerifier
-              .create[IO](staticKeyProvider(googleKeys), rotatingDiscovery, jsonSupport)
+              .discovery[IO](googleKeyProvider, rotatingDiscovery, jsonSupport)
 
           (1 to 4)
             .toList
@@ -369,23 +369,22 @@ object IdTokenVerifierTest {
     }
 
   private object TestValues {
-    private val keyFactory = KeyFactory.getInstance("RSA")
 
-    val googleKeys: Map[KeyId, PublicKey] =
+    val googleKeys: Map[KeyId, String] =
       Map(
         "f9d97b4cae90bcd76aeb20026f6b770cac221783" -> "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAya/7gVJrvqFp5xfYPOco8gBLY38kQDlTlT6ueHtUtbTkRVE1X5tFmPqChnX7wWd2fK7MS4+nclYaGLL7IvJtN9tjrD0h/3/HvnrRZTaVyS+yfWqCQDRq/0VW1LBEygwYRqbO2T0lOocTY+5qUosDvJfe+o+lQYMH7qtDAyiq9XprVzKYTfS545BTECXi0he9ikJl5Q/RAP1BZoaip8F0xX5Y/60G90VyXFWuy16nm5ASW8fwqzdn1lL/ogiO1LirgBFFEXz/t4PwmjWzfQwkoKv4Ab/l9u2FdAoKtFH2CwKaGB8hatIK3bOAJJgRebeU3w6Ah3gxRfi8HWPHbAGjtwIDAQAB",
         "85828c59284a69b54b27483e487c3bd46cd2a2b3" -> "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAzMHxWuxztMKXdBhv3rImlUvW/yp6nO03cVXPyA0Vyq0+M7LfOJJIF+OdNoRGdsFPHVKCFoo6qGhR8rBCmMxA4fM+Ubk5qKuUqCN9eP3yZJq8Cw9tUrt/qh7uW+qfMr0upcyeSHhC/zW1lTGs5sowDorKN/jQ1Sfh9hfBxfc8T7dQAAgEqqMcE3u+2J701jyhJz0pvurCfziiB3buY6SGREhBQwNwpnQjt/lE2U4km8FS0woPzt0ccE3zsGL2qM+LWZbOm9aXquSnqNJLt3tGVvShnev+GiJ1XfQ3EWm0f4w0TX9fTOkxstl0vo/vW/FjGQ0D1pXSjqb7n+hAdXwc9wIDAQAB",
         "bbd2ac7c4c5eb8adc8eeffbc8f5a2dd6cf7545e4" -> "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAy930dtGTeMG52IPsKmMuEpPHLaxuYQlduZd6BqFVjc2+UFZR8fNqtnYzAjbXWJD/Tqxgdlj/MW4vogvX4sHwVpZONvdyeGoIyDQtis6iuGQhQamV85F/JbrEUnEw3QCO87Liz5UXG6BK2HRyPhDfMex1/tO0ROmySLFdCTS17D0wah71Ibpi0gI8LUi6kzVRjYDIC1oE+iK3Y9s88Bi4ZGYJxXAbnNwbwVkGOKCXja9k0jjBGRxZD+4KDuf493lFOOEGSLDA2Qp9rDqrURP12XYgvf/zJx/kSDipnr0gL6Vz2n3H4+XN4tA45zuzRkHoE7+XexPq+tv7kQ8pSjY2uQIDAQAB"
       )
-        .fmap(encodedString => new X509EncodedKeySpec(Base64.getDecoder.decode(encodedString)))
-        .fmap(keyFactory.generatePublic)
 
-    val nonGoogleKeys: Map[KeyId, PublicKey] =
+    val nonGoogleKeys: Map[KeyId, String] =
       Map(
         "11e03f39b8d300c8c9a1b800ddebfcfde4152c0c" -> "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAsqimgNufhItNGnmuhttmAHQ3jBitVccH6O96zZuc868u5cUmW1rDItaJ7LP83i5gQtPDXLVJ0t4r80HcytBMOllTQtsck09Ck9X2BM7TN0xaIdZfCIGaEpzn1wV00da7qVdhR0Wf4uaJD46JKOXrQU1RWaeYcqFQxUfQr4acJrfBc1FA+Q9uPpMrFqi06ZmxuycyYmsjBlF/mjiCpX1m3UfoNzGh22nkWTaAL4BGVEjW7TjdgdiPmG8NAVTHPR52tFZbLk3ss/9ob6FBXAr+L+fJCkhAgDC3RE7TSAlkN0oaRLVAT9dmmunf2MoVHucLSgEEc9z+3JXZyK3MqDiSdQIDAQAB"
       )
-        .fmap(encodedString => new X509EncodedKeySpec(Base64.getDecoder.decode(encodedString)))
-        .fmap(keyFactory.generatePublic)
+
+    val googleKeyProvider: PublicKeyProvider[IO] = PublicKeyProvider.staticPem[IO](googleKeys).toOption.get
+
+    val nonGoogleKeyProvider: PublicKeyProvider[IO] = PublicKeyProvider.staticPem[IO](nonGoogleKeys).toOption.get
 
     val rawIdToken =
       "eyJhbGciOiJSUzI1NiIsImtpZCI6ImY5ZDk3YjRjYWU5MGJjZDc2YWViMjAwMjZmNmI3NzBjYWMyMjE3ODMiLCJ0eXAiOiJKV1QifQ.eyJhdWQiOiJodHRwczovL2V4YW1wbGUuY29tL3BhdGgiLCJhenAiOiJpbnRlZ3JhdGlvbi10ZXN0c0BjaGluZ29yLXRlc3QuaWFtLmdzZXJ2aWNlYWNjb3VudC5jb20iLCJlbWFpbCI6ImludGVncmF0aW9uLXRlc3RzQGNoaW5nb3ItdGVzdC5pYW0uZ3NlcnZpY2VhY2NvdW50LmNvbSIsImVtYWlsX3ZlcmlmaWVkIjp0cnVlLCJleHAiOjE1ODc2Mjk4ODgsImlhdCI6MTU4NzYyNjI4OCwiaXNzIjoiaHR0cHM6Ly9hY2NvdW50cy5nb29nbGUuY29tIiwic3ViIjoiMTA0MDI5MjkyODUzMDk5OTc4MjkzIn0.Pj4KsJh7riU7ZIbPMcHcHWhasWEcbVjGP4yx_5E0iOpeDalTdri97E-o0dSSkuVX2FeBIgGUg_TNNgJ3YY97T737jT5DUYwdv6M51dDlLmmNqlu_P6toGCSRC8-Beu5gGmqS2Y82TmpHH9Vhoh5PsK7_rVHk8U6VrrVVKKTWm_IzTFhqX1oYKPdvfyaNLsXPbCt_NFE0C3DNmFkgVhRJu7LtzQQN-ghaqd3Ga3i6KH222OEI_PU4BUTvEiNOqRGoMlT_YOsyFN3XwqQ6jQGWhhkArL1z3CG2BVQjHTKpgVsRyy_H6WTZiju2Q-XWobgH-UPSZbyymV8-cFT9XKEtZQ"

@@ -55,9 +55,7 @@ class PublicKeyProviderTest extends CatsEffectSuite {
       keyId1 -> "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAjN4xvvGtTeXxq5DZxQxBdafPZAfXn6uowE1VsVXRaSo28GAizL0OdErMui028K3pLN1XkThebJruh7SSadG3H7WJfpxf4wyCgj1ofbRIhbjjKcPqO86Lo/Uekzsv5MeW4Q2ZOvZiJkLnp3zFnFKaeBV0P408k2HbGnHS6LEcDqDWA7G+TmE+TZIoB6HZ0Q7dN3oFYJ831NZj3IyNRC9lzNaG+S00AEvKNO+3J59qig09Z/M9yuHlU1WI+BNO8wyx+5kZFe/px6m7QQ95y9v9EZWeIKMCQkomkXYhLOa7GQT9ITh5uINeRqh4rIzY1z5uAHDkgIqHn1Ztpw1O47jOewIDAQAB",
       keyId2 -> "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAyJdNun/DT8/krjOUFMk4UPb7KgOyoN2EIHVL77LFLUlzFwOLon1pEceYcWffNQnjdtzDCN5+q6DxlIiJyDgQhPPMpJzMcpZceo0tKd+Ve1RLEUVcbnbjyZ+inrxVWfYTOuWTsutt7EylFDIMfw1Dh14IccFG5loyLdtZX2yejhXmJzMCxTISE/lCxCIiIqu5filfc3AnnyNb66Mv/oyK5z22pc9f+dFAmT3e5IXA+0UkrEVtLl7lRGmWdBkAkEWzhh17aQ0BynxpcTX5efGyr2b5ktUObCNdKMwNE4/Berz4l7/Oz6+gWDlyjbROrHKx0B27SFHdtNHbYARJsfVsjwIDAQAB",
       keyId3 -> "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAy930dtGTeMG52IPsKmMuEpPHLaxuYQlduZd6BqFVjc2+UFZR8fNqtnYzAjbXWJD/Tqxgdlj/MW4vogvX4sHwVpZONvdyeGoIyDQtis6iuGQhQamV85F/JbrEUnEw3QCO87Liz5UXG6BK2HRyPhDfMex1/tO0ROmySLFdCTS17D0wah71Ibpi0gI8LUi6kzVRjYDIC1oE+iK3Y9s88Bi4ZGYJxXAbnNwbwVkGOKCXja9k0jjBGRxZD+4KDuf493lFOOEGSLDA2Qp9rDqrURP12XYgvf/zJx/kSDipnr0gL6Vz2n3H4+XN4tA45zuzRkHoE7+XexPq+tv7kQ8pSjY2uQIDAQAB"
-    )
-      .fmap(encodedString => new X509EncodedKeySpec(Base64.getDecoder.decode(encodedString)))
-      .fmap(keyFactory.generatePublic)
+    ).fmap(encodedString => KeyUtils.parsePublicPemKey(encodedString).toOption.get)
 
   val jwksUrl = "http://appleid.apple.com/.well-known/openid-configuration"
 
@@ -67,7 +65,7 @@ class PublicKeyProviderTest extends CatsEffectSuite {
 
   val discovery: OpenIdConnectDiscovery[Id] = OpenIdConnectDiscovery.static[Id](OpenIdConfig(issuer = Issuer(""), jwksUrl))
 
-  val keyProvider: PublicKeyProvider[Id] = PublicKeyProvider.jwks[Id](discovery)(transport, jsonSupport)
+  val keyProvider: PublicKeyProvider[Id] = PublicKeyProvider.discovery[Id](discovery)(transport, jsonSupport)
 
   test("First key") {
     val key1 = keyProvider.getKey(keyId1)
@@ -119,7 +117,7 @@ class PublicKeyProviderTest extends CatsEffectSuite {
               rotatingCache
             )
 
-        val publicKeyProvider = PublicKeyProvider.jwks(rotatingDiscovery)(ioTransport, jsonSupport)
+        val publicKeyProvider = PublicKeyProvider.discovery(rotatingDiscovery)(ioTransport, jsonSupport)
 
         (1 to 2)
           .toList
