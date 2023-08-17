@@ -52,7 +52,8 @@ object IdTokenVerifier {
     new IdTokenVerifier[F] {
       import jsonSupport._
 
-      private val supportedAlgorithms = Seq(JwtAlgorithm.RS256)
+      // According to OIDC RFC, only RS256 should be supported
+      private val supportedAlgorithms = Seq(JwtAlgorithm.RS256, JwtAlgorithm.RS384, JwtAlgorithm.RS512)
 
       override def verify(rawToken: String, expectedClientId: ClientId): F[Either[Error, IdTokenClaims.Subject]] =
         verifyAndDecode(rawToken).map(_.ensure(Error.ClientIdDoesNotMatch)(_.matchesClientId(expectedClientId)).map(_.subject))
