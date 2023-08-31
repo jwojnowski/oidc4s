@@ -4,6 +4,7 @@ val Scala3 = "3.3.0"
 ThisBuild / scalaVersion := Scala213
 ThisBuild / crossScalaVersions := Seq(Scala213, Scala3)
 ThisBuild / organization := "me.wojnowski"
+ThisBuild / versionScheme := Some("early-semver")
 
 inThisBuild(
   List(
@@ -24,7 +25,8 @@ inThisBuild(
 )
 
 val commonSettings = Seq(
-  makePom / publishArtifact := true
+  makePom / publishArtifact := true,
+  mimaPreviousArtifacts := previousStableVersion.value.map(organization.value %% moduleName.value % _).toSet
 )
 
 lazy val Versions = new {
@@ -87,6 +89,7 @@ lazy val quickSttpCirce = (project in file("quick-sttp-circe"))
 
 lazy val root = (project in file("."))
   .settings(
-    publish / skip := true
+    publish / skip := true,
+    mimaFailOnNoPrevious := false
   )
   .aggregate(core, circe, sttp, quickSttpCirce)
