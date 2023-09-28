@@ -1,8 +1,9 @@
 package me.wojnowski.oidc4s.json.circe
 
+import me.wojnowski.oidc4s.Algorithm
+import me.wojnowski.oidc4s.JwtHeader
 import me.wojnowski.oidc4s.json.circe.CirceJsonSupport
 import munit.FunSuite
-import pdi.jwt.JwtHeader
 
 class JwtHeaderCirceJsonSupportTest extends FunSuite {
   test("JwtHeader is decoding") {
@@ -11,7 +12,7 @@ class JwtHeaderCirceJsonSupportTest extends FunSuite {
 
     val result = CirceJsonSupport.jwtHeaderDecoder.decode(rawJson)
 
-    assertEquals(result, Right(JwtHeader(keyId = Some("thisiskeyid"))))
+    assertEquals(result, Right(JwtHeader(keyId = "thisiskeyid", algorithm = Algorithm.Rs256)))
   }
 
   test("JwtHeader decoding (missing field)") {

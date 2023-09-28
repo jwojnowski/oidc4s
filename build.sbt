@@ -52,7 +52,6 @@ lazy val core = (project in file("core")).settings(
     name := "oidc4s-core",
     libraryDependencies += "org.typelevel" %% "cats-core" % Versions.cats.core,
     libraryDependencies += "org.typelevel" %% "cats-effect" % Versions.cats.effect,
-    libraryDependencies += "com.github.jwt-scala" %% "jwt-core" % Versions.jwtScala,
     libraryDependencies += "org.scalameta" %% "munit" % Versions.mUnit % Test,
     libraryDependencies += "org.typelevel" %% "munit-cats-effect-3" % Versions.mUnitCatsEffect % Test,
     libraryDependencies += "org.typelevel" %% "cats-effect-testkit" % Versions.cats.effect % Test
