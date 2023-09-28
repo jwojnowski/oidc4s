@@ -12,8 +12,6 @@ on front-end side can lead to a simple, yet secure authentication for Single Pag
 
 Scala versions 3.x and 2.13.x are supported.
 
-[JWT Scala](https://github.com/jwt-scala/jwt-scala) is used for JWT verification under-the-hood. 
-
 ## Getting started
 
 To use this library with default Sttp/Circe implementations, add the following dependency to your `build.sbt`:

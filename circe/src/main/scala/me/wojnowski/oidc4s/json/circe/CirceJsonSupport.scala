@@ -1,18 +1,15 @@
 package me.wojnowski.oidc4s.json.circe
 
-import cats.data.NonEmptySet
 import cats.syntax.all._
 import io.circe.Decoder
 import io.circe.parser
 import me.wojnowski.oidc4s.IdTokenClaims
-import me.wojnowski.oidc4s.IdTokenClaims.Audience
-import me.wojnowski.oidc4s.Issuer
+import me.wojnowski.oidc4s.JwtHeader
 import me.wojnowski.oidc4s.PublicKeyProvider
 import me.wojnowski.oidc4s.config.OpenIdConfig
 import me.wojnowski.oidc4s.json.JsonDecoder
 import me.wojnowski.oidc4s.json.JsonDecoder.ClaimsDecoder
 import me.wojnowski.oidc4s.json.JsonSupport
-import pdi.jwt.JwtHeader
 
 trait CirceJsonSupport
   extends JsonSupport

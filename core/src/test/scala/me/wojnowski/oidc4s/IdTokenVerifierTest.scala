@@ -7,9 +7,7 @@ import cats.effect.IO
 import cats.effect.testkit.TestControl
 import cats.syntax.all._
 import me.wojnowski.oidc4s.IdTokenClaims._
-import me.wojnowski.oidc4s.IdTokenVerifier.Error.JwtVerificationError
-import me.wojnowski.oidc4s.IdTokenVerifier.Error.UnexpectedIssuer
-import me.wojnowski.oidc4s.IdTokenVerifierTest.staticKeyProvider
+import me.wojnowski.oidc4s.IdTokenVerifier.Error._
 import me.wojnowski.oidc4s.PublicKeyProvider.KeyId
 import me.wojnowski.oidc4s.PublicKeyProvider.KeyMap
 import me.wojnowski.oidc4s.TimeUtils.InstantToFiniteDuration
@@ -21,17 +19,9 @@ import me.wojnowski.oidc4s.mocks.CacheMock
 import me.wojnowski.oidc4s.mocks.HttpTransportMock
 import me.wojnowski.oidc4s.mocks.JsonSupportMock
 import munit.CatsEffectSuite
-import pdi.jwt.JwtHeader
-import pdi.jwt.exceptions.JwtEmptyAlgorithmException
-import pdi.jwt.exceptions.JwtEmptySignatureException
-import pdi.jwt.exceptions.JwtExpirationException
-import pdi.jwt.exceptions.JwtValidationException
 
-import java.security.KeyFactory
 import java.security.PublicKey
-import java.security.spec.X509EncodedKeySpec
 import java.time.Instant
-import java.util.Base64
 import scala.annotation.unused
 
 //noinspection ZeroIndexToHead
@@ -64,8 +54,8 @@ class IdTokenVerifierTest extends CatsEffectSuite {
         .discovery[IO](googleKeyProvider, discovery, jsonSupport)
         .verifyAndDecode(rawIdToken)
         .map {
-          case Left(JwtVerificationError(_: JwtExpirationException)) => ()
-          case _                                                     => fail("expected JwtExpirationException")
+          case Left(TokenExpired(`idTokenExpiration`)) => ()
+          case _                                       => fail(s"expected $TokenExpired")
         }
     }
   }
@@ -228,8 +218,8 @@ class IdTokenVerifierTest extends CatsEffectSuite {
         .discovery[IO](googleKeyProvider, discovery, jsonSupport)
         .verifyAndDecode(tokenSignedWithOtherKey)
         .map {
-          case Left(JwtVerificationError(_: JwtValidationException)) => ()
-          case e                                                     => fail(s"expected JwtValidationException, got $e")
+          case Left(InvalidSignature) => ()
+          case e                      => fail(s"expected JwtValidationException, got $e")
         }
     }
   }
@@ -276,8 +266,8 @@ class IdTokenVerifierTest extends CatsEffectSuite {
         .discovery[IO](nonGoogleKeyProvider, discovery, jsonSupport)
         .verifyAndDecode(tokenWithAlgorithmNone)
         .map {
-          case Left(JwtVerificationError(_: JwtEmptySignatureException)) => ()
-          case e                                                         => fail(s"expected JwtEmptySignatureException, got $e")
+          case Left(InvalidToken) => ()
+          case e                  => fail(s"expected JwtEmptySignatureException, got $e")
         }
     }
   }
@@ -291,8 +281,8 @@ class IdTokenVerifierTest extends CatsEffectSuite {
         .discovery[IO](nonGoogleKeyProvider, discovery, jsonSupport)
         .verifyAndDecode(tokenWithAlgorithmNone)
         .map {
-          case Left(JwtVerificationError(_: JwtEmptyAlgorithmException)) => ()
-          case e                                                         => fail(s"expected JwtEmptyAlgorithmException, got $e")
+          case Left(UnsupportedAlgorithm(_)) => ()
+          case e                             => fail(s"expected $UnsupportedAlgorithm, got $e")
         }
     }
   }
@@ -305,8 +295,8 @@ class IdTokenVerifierTest extends CatsEffectSuite {
         .discovery[IO](nonGoogleKeyProvider, discovery, jsonSupport)
         .verifyAndDecode(tokenWithHs256Algorithm)
         .map {
-          case Left(JwtVerificationError(_: JwtValidationException)) => ()
-          case e                                                     => fail(s"expected JwtValidationException, got $e")
+          case Left(UnsupportedAlgorithm(_)) => ()
+          case e                             => fail(s"expected $UnsupportedAlgorithm, got $e")
         }
     }
   }
@@ -427,10 +417,10 @@ object IdTokenVerifierTest {
 
     val decodedJwtHeaders =
       List(
-        JwtHeader(keyId = Some("f9d97b4cae90bcd76aeb20026f6b770cac221783")),
-        JwtHeader(keyId = Some("11e03f39b8d300c8c9a1b800ddebfcfde4152c0c")),
-        JwtHeader(keyId = Some("11e03f39b8d300c8c9a1b800ddebfcfde4152c0c")),
-        JwtHeader(keyId = Some("11e03f39b8d300c8c9a1b800ddebfcfde4152c0c"))
+        JwtHeader(keyId = "f9d97b4cae90bcd76aeb20026f6b770cac221783", algorithm = Algorithm.Rs256),
+        JwtHeader(keyId = "11e03f39b8d300c8c9a1b800ddebfcfde4152c0c", algorithm = Algorithm.Rs256),
+        JwtHeader(keyId = "11e03f39b8d300c8c9a1b800ddebfcfde4152c0c", algorithm = Algorithm.Other("none")),
+        JwtHeader(keyId = "11e03f39b8d300c8c9a1b800ddebfcfde4152c0c", algorithm = Algorithm.Other("HS256"))
       )
 
   }

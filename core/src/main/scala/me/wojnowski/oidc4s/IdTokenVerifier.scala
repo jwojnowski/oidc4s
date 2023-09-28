@@ -2,25 +2,27 @@ package me.wojnowski.oidc4s
 
 import cats.Monad
 import cats.data.EitherT
-import cats.data.NonEmptySet
 import cats.effect.Clock
 import cats.syntax.all._
-import me.wojnowski.oidc4s.IdTokenClaims.Audience
-import me.wojnowski.oidc4s.IdTokenVerifier.Error.CouldNotExtractKeyId
-import me.wojnowski.oidc4s.IdTokenVerifier.Error.JwtVerificationError
+import me.wojnowski.oidc4s.IdTokenVerifier.Error.CouldNotDecodeClaim
+import me.wojnowski.oidc4s.IdTokenVerifier.Error.CouldNotDecodeHeader
+import me.wojnowski.oidc4s.IdTokenVerifier.Error.InvalidSignature
+import me.wojnowski.oidc4s.IdTokenVerifier.Error.InvalidToken
+import me.wojnowski.oidc4s.IdTokenVerifier.Error.TokenExpired
+import me.wojnowski.oidc4s.IdTokenVerifier.Error.UnsupportedAlgorithm
 import me.wojnowski.oidc4s.config.OpenIdConnectDiscovery
 import me.wojnowski.oidc4s.json.JsonDecoder
 import me.wojnowski.oidc4s.json.JsonDecoder.ClaimsDecoder
 import me.wojnowski.oidc4s.json.JsonSupport
-import pdi.jwt.Jwt
-import pdi.jwt.JwtAlgorithm
-import pdi.jwt.JwtHeader
 
 import java.nio.charset.StandardCharsets
 import java.security.PublicKey
+import java.security.Signature
+import java.time.Instant
 import java.time.ZoneId
 import java.time.{Clock => JavaClock}
 import java.util.Base64
+import scala.util.Success
 import scala.util.Try
 
 trait IdTokenVerifier[F[_]] {
@@ -78,9 +80,6 @@ object IdTokenVerifier {
     new IdTokenVerifier[F] {
       import jsonSupport._
 
-      // According to OIDC RFC, only RS256 should be supported
-      private val supportedAlgorithms = Seq(JwtAlgorithm.RS256, JwtAlgorithm.RS384, JwtAlgorithm.RS512)
-
       override def verify(rawToken: String, expectedClientId: ClientId): F[Either[Error, IdTokenClaims.Subject]] =
         verifyAndDecode(rawToken).map(_.ensure(Error.ClientIdDoesNotMatch)(_.matchesClientId(expectedClientId)).map(_.subject))
 
@@ -104,49 +103,74 @@ object IdTokenVerifier {
       ): F[Either[IdTokenVerifier.Error, A]] = {
         for {
           issuer     <- EitherT(issuerF)
-          instant    <- EitherT.liftF(Clock[F].realTimeInstant)
-          javaClock = JavaClock.fixed(instant, ZoneId.of("UTC"))
+          now        <- EitherT.liftF(Clock[F].realTimeInstant)
           headerJson <- EitherT.fromEither(extractHeaderJson(rawToken))
-          kid        <- EitherT.fromEither(extractKid(headerJson))
-          publicKey  <- EitherT(publicKeyProvider.getKey(kid).map(_.leftMap(IdTokenVerifier.Error.CouldNotFindPublicKey.apply)))
+          header     <- EitherT.fromEither(decodeHeader(headerJson))
+          publicKey  <- EitherT(publicKeyProvider.getKey(header.keyId).map(_.leftMap(IdTokenVerifier.Error.CouldNotFindPublicKey.apply)))
           result     <- EitherT.fromEither {
-                          decodeAndVerifyToken[(A, IdTokenClaims)](rawToken, javaClock, publicKey)
-                            .flatMap { case (claims, standardClaims) =>
-                              ensureExpectedIssuer(tokenIssuer = standardClaims.issuer, expectedIssuer = issuer)
-                                .leftWiden[IdTokenVerifier.Error]
-                                .flatTap { _ =>
-                                  standardClaimsCheck(standardClaims)
-                                }
-                                .as(claims)
-                            }
+                          decodeJwtAndVerifySignature[A](rawToken, publicKey, header).flatMap { case (claims, standardClaims) =>
+                            List(
+                              ensureNotExpired(now, standardClaims.expiration),
+                              ensureExpectedIssuer(tokenIssuer = standardClaims.issuer, expectedIssuer = issuer),
+                              standardClaimsCheck(standardClaims)
+                            ).sequence.as(claims)
+                          }
                         }
         } yield result
       }.value
 
-      private def decodeAndVerifyToken[A: JsonDecoder](
-        rawToken: String,
-        javaClock: JavaClock,
-        publicKey: PublicKey
-      ): Either[Error, A] =
-        Jwt(javaClock)
-          .decodeRaw(rawToken, publicKey, supportedAlgorithms)
-          .toEither
-          .leftMap[Error](throwable => JwtVerificationError(throwable))
-          .flatMap { rawClaims =>
-            JsonDecoder[A]
-              .decode(rawClaims)
-              .leftMap(IdTokenVerifier.Error.CouldNotDecodeClaim.apply)
-          }
-
       private def ensureExpectedIssuer(tokenIssuer: Issuer, expectedIssuer: Issuer): Either[Error.UnexpectedIssuer, Unit] =
         Either.cond(expectedIssuer === tokenIssuer, (), IdTokenVerifier.Error.UnexpectedIssuer(tokenIssuer, expectedIssuer))
 
-      private def extractKid(headerJson: String): Either[CouldNotExtractKeyId.type, String] =
+      private def ensureNotExpired(now: Instant, expiresAt: Instant): Either[Error.TokenExpired, Unit] =
+        Either.raiseWhen(expiresAt.isBefore(now))(TokenExpired(since = expiresAt))
+
+      private def decodeHeader(headerJson: String): Either[CouldNotDecodeHeader, JwtHeader] =
         JsonDecoder[JwtHeader]
           .decode(headerJson)
-          .toOption
-          .flatMap(_.keyId)
-          .toRight(CouldNotExtractKeyId)
+          .leftMap(CouldNotDecodeHeader.apply)
+
+      private def decodeJwtAndVerifySignature[A: ClaimsDecoder](rawToken: String, key: PublicKey, header: JwtHeader)
+        : Either[Error, (A, IdTokenClaims)] =
+        rawToken.split('.') match {
+          case Array(rawHeader, rawClaims, rawSignature) =>
+            for {
+              _      <- verifyAlgorithm(header.algorithm)
+              _      <- verifySignature(header.algorithm.fullName, key, rawHeader, rawClaims, rawSignature)
+              result <- parseClaims[A](rawClaims)
+            } yield result
+
+          case _ =>
+            InvalidToken.asLeft
+        }
+
+      private def parseClaims[A: ClaimsDecoder](rawClaims: String): Either[CouldNotDecodeClaim, (A, IdTokenClaims)] =
+        Try {
+          new String(Base64.getUrlDecoder.decode(rawClaims))
+        }.toEither.leftMap(t => CouldNotDecodeClaim(t.getMessage)).flatMap { rawJson =>
+          ClaimsDecoder[A].decode(rawJson).leftMap(CouldNotDecodeClaim.apply)
+        }
+
+      private def verifyAlgorithm(algorithm: Algorithm) =
+        Either.raiseUnless(Algorithm.supportedAlgorithms.contains_(algorithm))(UnsupportedAlgorithm(algorithm.name.some))
+
+      private def verifySignature(
+        signingAlgorithm: String,
+        publicKey: PublicKey,
+        rawHeader: String,
+        rawClaims: String,
+        rawSignature: String
+      ) =
+        Try {
+          val decodedSignature = Base64.getUrlDecoder.decode(rawSignature)
+          val signatureInstance = Signature.getInstance(signingAlgorithm)
+          signatureInstance.initVerify(publicKey)
+          signatureInstance.update(s"$rawHeader.$rawClaims".getBytes(StandardCharsets.UTF_8))
+          signatureInstance.verify(decodedSignature)
+        } match {
+          case Success(true) => Either.unit
+          case _             => InvalidSignature.asLeft
+        }
 
       private def extractHeaderJson(rawToken: String) =
         Try {
@@ -171,9 +195,17 @@ object IdTokenVerifier {
 
     case class CouldNotFindPublicKey(cause: PublicKeyProvider.Error) extends Error
 
+    case class CouldNotDecodeHeader(details: String) extends Error
+
     case class CouldNotDecodeClaim(details: String) extends Error
 
-    case class JwtVerificationError(cause: Throwable) extends Error
+    case class TokenExpired(since: Instant) extends Error
+
+    case object InvalidToken extends Error
+
+    case object InvalidSignature extends Error
+
+    case class UnsupportedAlgorithm(providedAlgorithm: Option[String]) extends Error
 
     case class UnexpectedIssuer(found: Issuer, expected: Issuer) extends Error
   }
