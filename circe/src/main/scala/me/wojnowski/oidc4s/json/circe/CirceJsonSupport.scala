@@ -38,7 +38,7 @@ trait CirceJsonSupport
     Decoder.instance { hCursor =>
       (
         Decoder[A].tryDecode(hCursor),
-        Decoder[IdTokenClaims].tryDecode(hCursor),
+        Decoder[IdTokenClaims].tryDecode(hCursor)
       ).tupled
     }
 
