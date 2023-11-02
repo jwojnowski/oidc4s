@@ -83,7 +83,7 @@ class PropertyIdTokenVerifierTest extends CatsEffectSuite with ScalaCheckEffectS
     val claims = IdTokenClaims(issuer, subject, NonEmptySet.of(Audience(clientId.value)), expiresAt, issuedAt)
 
     val rawHeader = s"""{"alg":"${algorithm.name}","kid":"$keyId"}"""
-    val header = JwtHeader(keyId.toString, algorithm)
+    val header = JoseHeader(keyId.toString, algorithm)
 
     val verifier =
       IdTokenVerifier.static(

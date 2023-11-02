@@ -125,12 +125,12 @@ object IdTokenVerifier {
       private def ensureNotExpired(now: Instant, expiresAt: Instant): Either[Error.TokenExpired, Unit] =
         Either.raiseWhen(expiresAt.isBefore(now))(TokenExpired(since = expiresAt))
 
-      private def decodeHeader(headerJson: String): Either[CouldNotDecodeHeader, JwtHeader] =
-        JsonDecoder[JwtHeader]
+      private def decodeHeader(headerJson: String): Either[CouldNotDecodeHeader, JoseHeader] =
+        JsonDecoder[JoseHeader]
           .decode(headerJson)
           .leftMap(CouldNotDecodeHeader.apply)
 
-      private def decodeJwtAndVerifySignature[A: ClaimsDecoder](rawToken: String, key: PublicKey, header: JwtHeader)
+      private def decodeJwtAndVerifySignature[A: ClaimsDecoder](rawToken: String, key: PublicKey, header: JoseHeader)
         : Either[Error, (A, IdTokenClaims)] =
         rawToken.split('.') match {
           case Array(rawHeader, rawClaims, rawSignature) =>

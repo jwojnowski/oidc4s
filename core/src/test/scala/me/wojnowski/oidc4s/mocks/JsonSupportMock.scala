@@ -1,7 +1,7 @@
 package me.wojnowski.oidc4s.mocks
 
 import me.wojnowski.oidc4s.IdTokenClaims
-import me.wojnowski.oidc4s.JwtHeader
+import me.wojnowski.oidc4s.JoseHeader
 import me.wojnowski.oidc4s.PublicKeyProvider.JsonWebKeySet
 import me.wojnowski.oidc4s.config.OpenIdConfig
 import me.wojnowski.oidc4s.json.JsonDecoder
@@ -11,13 +11,13 @@ object JsonSupportMock {
 
   def instance(
     idTokenTranslations: PartialFunction[String, IdTokenClaims] = PartialFunction.empty,
-    jwtHeaderTranslations: PartialFunction[String, JwtHeader] = PartialFunction.empty,
+    joseHeaderTranslations: PartialFunction[String, JoseHeader] = PartialFunction.empty,
     openIdConfigTranslations: PartialFunction[String, OpenIdConfig] = PartialFunction.empty,
     jsonWebKeySetTranslations: PartialFunction[String, JsonWebKeySet] = PartialFunction.empty
   ): JsonSupport = new JsonSupport {
 
-    override implicit val jwtHeaderDecoder: JsonDecoder[JwtHeader] =
-      translateOrFail(jwtHeaderTranslations, "JwtHeader")
+    override implicit val joseHeaderDecoder: JsonDecoder[JoseHeader] =
+      translateOrFail(joseHeaderTranslations, "JwtHeader")
 
     override implicit val idTokenDecoder: JsonDecoder[IdTokenClaims] =
       translateOrFail(idTokenTranslations, "IdTokenClaims")
