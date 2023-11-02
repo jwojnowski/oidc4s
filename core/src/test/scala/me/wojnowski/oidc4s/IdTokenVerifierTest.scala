@@ -266,8 +266,8 @@ class IdTokenVerifierTest extends CatsEffectSuite {
         .discovery[IO](nonGoogleKeyProvider, discovery, jsonSupport)
         .verifyAndDecode(tokenWithAlgorithmNone)
         .map {
-          case Left(InvalidToken) => ()
-          case e                  => fail(s"expected JwtEmptySignatureException, got $e")
+          case Left(MalformedToken) => ()
+          case e                    => fail(s"expected JwtEmptySignatureException, got $e")
         }
     }
   }

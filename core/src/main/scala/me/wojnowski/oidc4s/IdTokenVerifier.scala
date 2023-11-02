@@ -7,7 +7,7 @@ import cats.syntax.all._
 import me.wojnowski.oidc4s.IdTokenVerifier.Error.CouldNotDecodeClaim
 import me.wojnowski.oidc4s.IdTokenVerifier.Error.CouldNotDecodeHeader
 import me.wojnowski.oidc4s.IdTokenVerifier.Error.InvalidSignature
-import me.wojnowski.oidc4s.IdTokenVerifier.Error.InvalidToken
+import me.wojnowski.oidc4s.IdTokenVerifier.Error.MalformedToken
 import me.wojnowski.oidc4s.IdTokenVerifier.Error.TokenExpired
 import me.wojnowski.oidc4s.IdTokenVerifier.Error.UnsupportedAlgorithm
 import me.wojnowski.oidc4s.config.OpenIdConnectDiscovery
@@ -141,7 +141,7 @@ object IdTokenVerifier {
             } yield result
 
           case _ =>
-            InvalidToken.asLeft
+            MalformedToken.asLeft
         }
 
       private def parseClaims[A: ClaimsDecoder](rawClaims: String): Either[CouldNotDecodeClaim, (A, IdTokenClaims)] =
@@ -201,7 +201,7 @@ object IdTokenVerifier {
 
     case class TokenExpired(since: Instant) extends Error
 
-    case object InvalidToken extends Error
+    case object MalformedToken extends Error
 
     case object InvalidSignature extends Error
 
