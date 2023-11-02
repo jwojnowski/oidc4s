@@ -32,7 +32,7 @@ class IdTokenVerifierTest extends CatsEffectSuite {
   private val jsonSupport =
     JsonSupportMock.instance(
       idTokenTranslations = rawIdTokenClaims.zip(decodedIdTokenClaims).toMap,
-      jwtHeaderTranslations = rawJwtHeaders.zip(decodedJwtHeaders).toMap
+      joseHeaderTranslations = rawJoseHeaders.zip(decodedJoseHeaders).toMap
     )
 
   private val discovery = OpenIdConnectDiscovery.static[IO](OpenIdConfig(issuer = Issuer("https://accounts.google.com"), jwksUri = ""))
@@ -407,7 +407,7 @@ object IdTokenVerifierTest {
         )
       )
 
-    val rawJwtHeaders =
+    val rawJoseHeaders =
       List(
         """{"alg":"RS256","kid":"f9d97b4cae90bcd76aeb20026f6b770cac221783","typ":"JWT"}""",
         """{"alg":"RS256","kid":"11e03f39b8d300c8c9a1b800ddebfcfde4152c0c","typ":"JWT"}""",
@@ -415,12 +415,12 @@ object IdTokenVerifierTest {
         """{"alg":"HS256","kid":"11e03f39b8d300c8c9a1b800ddebfcfde4152c0c","typ":"JWT"}"""
       )
 
-    val decodedJwtHeaders =
+    val decodedJoseHeaders =
       List(
-        JwtHeader(keyId = "f9d97b4cae90bcd76aeb20026f6b770cac221783", algorithm = Algorithm.Rs256),
-        JwtHeader(keyId = "11e03f39b8d300c8c9a1b800ddebfcfde4152c0c", algorithm = Algorithm.Rs256),
-        JwtHeader(keyId = "11e03f39b8d300c8c9a1b800ddebfcfde4152c0c", algorithm = Algorithm.Other("none")),
-        JwtHeader(keyId = "11e03f39b8d300c8c9a1b800ddebfcfde4152c0c", algorithm = Algorithm.Other("HS256"))
+        JoseHeader(keyId = "f9d97b4cae90bcd76aeb20026f6b770cac221783", algorithm = Algorithm.Rs256),
+        JoseHeader(keyId = "11e03f39b8d300c8c9a1b800ddebfcfde4152c0c", algorithm = Algorithm.Rs256),
+        JoseHeader(keyId = "11e03f39b8d300c8c9a1b800ddebfcfde4152c0c", algorithm = Algorithm.Other("none")),
+        JoseHeader(keyId = "11e03f39b8d300c8c9a1b800ddebfcfde4152c0c", algorithm = Algorithm.Other("HS256"))
       )
 
   }

@@ -4,7 +4,7 @@ import cats.syntax.all._
 import io.circe.Decoder
 import io.circe.parser
 import me.wojnowski.oidc4s.IdTokenClaims
-import me.wojnowski.oidc4s.JwtHeader
+import me.wojnowski.oidc4s.JoseHeader
 import me.wojnowski.oidc4s.PublicKeyProvider
 import me.wojnowski.oidc4s.config.OpenIdConfig
 import me.wojnowski.oidc4s.json.JsonDecoder
@@ -14,11 +14,11 @@ import me.wojnowski.oidc4s.json.JsonSupport
 trait CirceJsonSupport
   extends JsonSupport
   with IdTokenCirceDecoder
-  with JwtHeaderCirceDecoder
+  with JoseHeaderCirceDecoder
   with OpenIdConfigurationCirceDecoder
   with JsonWebKeySetCirceDecoder {
 
-  override implicit val jwtHeaderDecoder: JsonDecoder[JwtHeader] = fromCirce
+  override implicit val joseHeaderDecoder: JsonDecoder[JoseHeader] = fromCirce
 
   override implicit val idTokenDecoder: JsonDecoder[IdTokenClaims] = fromCirce
 
