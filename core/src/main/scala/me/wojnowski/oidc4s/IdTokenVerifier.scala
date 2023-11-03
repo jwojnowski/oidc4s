@@ -4,23 +4,16 @@ import cats.Monad
 import cats.data.EitherT
 import cats.effect.Clock
 import cats.syntax.all._
-import me.wojnowski.oidc4s.IdTokenVerifier.Error.CouldNotDecodeClaim
-import me.wojnowski.oidc4s.IdTokenVerifier.Error.CouldNotDecodeHeader
-import me.wojnowski.oidc4s.IdTokenVerifier.Error.InvalidSignature
-import me.wojnowski.oidc4s.IdTokenVerifier.Error.MalformedToken
-import me.wojnowski.oidc4s.IdTokenVerifier.Error.TokenExpired
-import me.wojnowski.oidc4s.IdTokenVerifier.Error.UnsupportedAlgorithm
+import me.wojnowski.oidc4s.IdTokenVerifier.Error._
 import me.wojnowski.oidc4s.config.OpenIdConnectDiscovery
-import me.wojnowski.oidc4s.json.JsonDecoder
 import me.wojnowski.oidc4s.json.JsonDecoder.ClaimsDecoder
+import me.wojnowski.oidc4s.json.JsonDecoder
 import me.wojnowski.oidc4s.json.JsonSupport
 
 import java.nio.charset.StandardCharsets
 import java.security.PublicKey
 import java.security.Signature
 import java.time.Instant
-import java.time.ZoneId
-import java.time.{Clock => JavaClock}
 import java.util.Base64
 import scala.util.Success
 import scala.util.Try
@@ -125,17 +118,24 @@ object IdTokenVerifier {
       private def ensureNotExpired(now: Instant, expiresAt: Instant): Either[Error.TokenExpired, Unit] =
         Either.raiseWhen(expiresAt.isBefore(now))(TokenExpired(since = expiresAt))
 
-      private def decodeHeader(headerJson: String): Either[CouldNotDecodeHeader, JoseHeader] =
+      private def decodeHeader(headerJson: String): Either[Error, JoseHeader] = {
+        val unsupportedAlgorithmPrefix = "Unsupported algorithm: "
+
         JsonDecoder[JoseHeader]
           .decode(headerJson)
-          .leftMap(CouldNotDecodeHeader.apply)
+          .leftMap {
+            case details if details.startsWith(unsupportedAlgorithmPrefix) =>
+              UnsupportedAlgorithm(details.stripPrefix(unsupportedAlgorithmPrefix))
+            case details                                                   =>
+              CouldNotDecodeHeader(details)
+          }
+      }
 
       private def decodeJwtAndVerifySignature[A: ClaimsDecoder](rawToken: String, key: PublicKey, header: JoseHeader)
         : Either[Error, (A, IdTokenClaims)] =
         rawToken.split('.') match {
           case Array(rawHeader, rawClaims, rawSignature) =>
             for {
-              _      <- verifyAlgorithm(header.algorithm)
               _      <- verifySignature(header.algorithm.fullName, key, rawHeader, rawClaims, rawSignature)
               result <- parseClaims[A](rawClaims)
             } yield result
@@ -150,9 +150,6 @@ object IdTokenVerifier {
         }.toEither.leftMap(t => CouldNotDecodeClaim(t.getMessage)).flatMap { rawJson =>
           ClaimsDecoder[A].decode(rawJson).leftMap(CouldNotDecodeClaim.apply)
         }
-
-      private def verifyAlgorithm(algorithm: Algorithm) =
-        Either.raiseUnless(Algorithm.supportedAlgorithms.contains_(algorithm))(UnsupportedAlgorithm(algorithm.name.some))
 
       private def verifySignature(
         signingAlgorithm: String,
@@ -197,6 +194,8 @@ object IdTokenVerifier {
 
     case class CouldNotDecodeHeader(details: String) extends Error
 
+    case class UnsupportedAlgorithm(providedAlgorithm: String) extends Error
+
     case class CouldNotDecodeClaim(details: String) extends Error
 
     case class TokenExpired(since: Instant) extends Error
@@ -204,8 +203,6 @@ object IdTokenVerifier {
     case object MalformedToken extends Error
 
     case object InvalidSignature extends Error
-
-    case class UnsupportedAlgorithm(providedAlgorithm: Option[String]) extends Error
 
     case class UnexpectedIssuer(found: Issuer, expected: Issuer) extends Error
   }

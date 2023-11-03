@@ -89,7 +89,7 @@ class PropertyIdTokenVerifierTest extends CatsEffectSuite with ScalaCheckEffectS
       IdTokenVerifier.static(
         publicKeyProvider,
         issuer,
-        JsonSupportMock.instance(Map(rawClaims -> claims), Map(rawHeader -> header))
+        JsonSupportMock.instance(Map(rawClaims -> Right(claims)), Map(rawHeader -> Right(header)))
       )
 
     val rawJwt =
