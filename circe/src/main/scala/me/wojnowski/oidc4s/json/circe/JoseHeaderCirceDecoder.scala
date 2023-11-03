@@ -7,7 +7,7 @@ import me.wojnowski.oidc4s.JoseHeader
 trait JoseHeaderCirceDecoder {
 
   private implicit val jwtAlgorithmCirceDecoder: Decoder[Algorithm] =
-    Decoder[String].map(Algorithm.fromString)
+    Decoder[String].emap(shortName => Algorithm.findByShortName(shortName).toRight(s"Unsupported algorithm: $shortName"))
 
   protected implicit val joseHeaderCirceDecoder: Decoder[JoseHeader] =
     Decoder.forProduct2[JoseHeader, String, Algorithm]("kid", "alg")(JoseHeader.apply)
