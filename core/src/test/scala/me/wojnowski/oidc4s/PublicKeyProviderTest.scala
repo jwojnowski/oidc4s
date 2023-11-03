@@ -61,7 +61,7 @@ class PublicKeyProviderTest extends CatsEffectSuite {
 
   private val transport = HttpTransportMock.const[Id](jwksUrl, "")
 
-  private val jsonSupport = JsonSupportMock.instance(jsonWebKeySetTranslations = { _ => jsonWebKeySet })
+  private val jsonSupport = JsonSupportMock.instance(jsonWebKeySetTranslations = { _ => Right(jsonWebKeySet) })
 
   val discovery: OpenIdConnectDiscovery[Id] = OpenIdConnectDiscovery.static[Id](OpenIdConfig(issuer = Issuer(""), jwksUrl))
 

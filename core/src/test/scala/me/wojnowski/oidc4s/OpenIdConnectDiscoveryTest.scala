@@ -20,7 +20,7 @@ class OpenIdConnectDiscoveryTest extends FunSuite {
       )
     val transport = HttpTransportMock.const[Id](configurationUrl, response = "correct-config-response")
     val jsonSupport = JsonSupportMock.instance(openIdConfigTranslations = { case "correct-config-response" =>
-      expectedConfig
+      Right(expectedConfig)
     })
 
     val discovery =
