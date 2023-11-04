@@ -121,11 +121,8 @@ object IdTokenVerifier {
       private def decodeHeader(headerJson: String): Either[Error, JoseHeader] =
         JsonDecoder[JoseHeader]
           .decode(headerJson)
-          .leftMap {
-            case details if details.startsWith(JsonSupport.unsupportedAlgorithmErrorPrefix) =>
-              UnsupportedAlgorithm(details.stripPrefix(JsonSupport.unsupportedAlgorithmErrorPrefix))
-            case details                                                                    =>
-              CouldNotDecodeHeader(details)
+          .leftMap { rawError =>
+            UnsupportedAlgorithm.fromRawError(rawError).getOrElse(CouldNotDecodeHeader(rawError))
           }
 
       private def decodeJwtAndVerifySignature[A: ClaimsDecoder](rawToken: String, key: PublicKey, header: JoseHeader)
@@ -185,13 +182,22 @@ object IdTokenVerifier {
 
     case object CouldNotExtractHeader extends Error
 
-    case object CouldNotExtractKeyId extends Error
-
     case class CouldNotFindPublicKey(cause: PublicKeyProvider.Error) extends Error
 
     case class CouldNotDecodeHeader(details: String) extends Error
 
-    case class UnsupportedAlgorithm(providedAlgorithm: String) extends Error
+    case class UnsupportedAlgorithm(providedAlgorithm: String) extends Error {
+      private[oidc4s] def toRawError: String = s"${UnsupportedAlgorithm.rawErrorPrefix}$providedAlgorithm"
+    }
+
+    object UnsupportedAlgorithm {
+
+      private val rawErrorPrefix = "Unsupported algorithm: "
+
+      private[oidc4s] def fromRawError(details: String): Option[UnsupportedAlgorithm] =
+        Option.when(details.startsWith(rawErrorPrefix))(UnsupportedAlgorithm(details.stripPrefix(rawErrorPrefix)))
+
+    }
 
     case class CouldNotDecodeClaim(details: String) extends Error
 

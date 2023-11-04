@@ -268,7 +268,7 @@ class IdTokenVerifierTest extends CatsEffectSuite {
         .verifyAndDecode(tokenWithAlgorithmNone)
         .map {
           case Left(UnsupportedAlgorithm(_)) => ()
-          case e                             => fail(s"expected ${UnsupportedAlgorithm}, got $e")
+          case e                             => fail(s"expected $UnsupportedAlgorithm, got $e")
         }
     }
   }
@@ -282,7 +282,22 @@ class IdTokenVerifierTest extends CatsEffectSuite {
         .verifyAndDecode(tokenWithHs256Algorithm)
         .map {
           case Left(UnsupportedAlgorithm(_)) => ()
-          case e                             => fail(s"expected ${UnsupportedAlgorithm}, got $e")
+          case e                             => fail(s"expected $UnsupportedAlgorithm, got $e")
+        }
+    }
+  }
+
+  test("Invalid header") {
+    val tokenWithInvalidHeader =
+      "dGhpcyBpcyBub3QgZXZlbiBhIEpTT04K.eyJhdWQiOiJodHRwczovL2V4YW1wbGUuY29tL3BhdGgiLCJhenAiOiJpbnRlZ3JhdGlvbi10ZXN0c0BjaGluZ29yLXRlc3QuaWFtLmdzZXJ2aWNlYWNjb3VudC5jb20iLCJlbWFpbCI6ImludGVncmF0aW9uLXRlc3RzQGNoaW5nb3ItdGVzdC5pYW0uZ3NlcnZpY2VhY2NvdW50LmNvbSIsImVtYWlsX3ZlcmlmaWVkIjp0cnVlLCJleHAiOjE1ODc2Mjk4ODgsImlhdCI6MTU4NzYyNjI4OCwiaXNzIjoiaHR0cHM6Ly9hY2NvdW50cy5nb29nbGUuY29tIiwic3ViIjoiMTA0MDI5MjkyODUzMDk5OTc4MjkzIn0.OZUxLojD0DddF9Phg63HQg3R6xvr2Gp3T3msRn09bHvaSUmr_SmMFrIAACiKHHJuQ43eZq9Qvc4ICCMrBwQfVV2FcOXffMQEA6SgTJxRcfSsfhdXX3QDJRGK27x0ynsarcWFrw9TefJyt_gPhhhE0yAzrxCHDPz0LRe8NCv4OvKnw9LZujF5P5k_AxduWTQJuNzHJGsx38E2NLW9SK93KbODZEzCX8YDkddfRfR_LZl2FciRsY6JoHtucqP5KMCFvSJBkfYqQGESeW8EUMxhBH8UrP1pcDD-6u7WXHM5bguC0rrGY6UPvRm3uZMcSYhyOnapC8f0zJBVXGyl9J5dWw"
+
+    runAtInstant(idTokenExpiration.minusSeconds(3)) {
+      IdTokenVerifier
+        .discovery[IO](nonGoogleKeyProvider, discovery, jsonSupport)
+        .verifyAndDecode(tokenWithInvalidHeader)
+        .map {
+          case Left(CouldNotDecodeHeader("not a JSON")) => ()
+          case e                                        => fail(s"expected $CouldNotDecodeHeader, got $e")
         }
     }
   }
@@ -398,15 +413,17 @@ object IdTokenVerifierTest {
         """{"alg":"RS256","kid":"f9d97b4cae90bcd76aeb20026f6b770cac221783","typ":"JWT"}""",
         """{"alg":"RS256","kid":"11e03f39b8d300c8c9a1b800ddebfcfde4152c0c","typ":"JWT"}""",
         """{"alg":"none","kid":"11e03f39b8d300c8c9a1b800ddebfcfde4152c0c","typ":"JWT"}""",
-        """{"alg":"HS256","kid":"11e03f39b8d300c8c9a1b800ddebfcfde4152c0c","typ":"JWT"}"""
+        """{"alg":"HS256","kid":"11e03f39b8d300c8c9a1b800ddebfcfde4152c0c","typ":"JWT"}""",
+        """this is not even a JSON"""
       )
 
     val decodedJoseHeaders =
       List(
         Right(JoseHeader(keyId = "f9d97b4cae90bcd76aeb20026f6b770cac221783", algorithm = Algorithm.Rs256)),
         Right(JoseHeader(keyId = "11e03f39b8d300c8c9a1b800ddebfcfde4152c0c", algorithm = Algorithm.Rs256)),
-        Left(s"${JsonSupport.unsupportedAlgorithmErrorPrefix}none"),
-        Left(s"${JsonSupport.unsupportedAlgorithmErrorPrefix}HS256")
+        Left(UnsupportedAlgorithm(providedAlgorithm = "none").toRawError),
+        Left(UnsupportedAlgorithm(providedAlgorithm = "HS256").toRawError),
+        Left("not a JSON")
       )
 
   }
