@@ -15,6 +15,7 @@ import me.wojnowski.oidc4s.config.Location
 import me.wojnowski.oidc4s.config.OpenIdConfig
 import me.wojnowski.oidc4s.config.OpenIdConnectDiscovery
 import me.wojnowski.oidc4s.json.JsonDecoder
+import me.wojnowski.oidc4s.json.JsonSupport
 import me.wojnowski.oidc4s.mocks.CacheMock
 import me.wojnowski.oidc4s.mocks.HttpTransportMock
 import me.wojnowski.oidc4s.mocks.JsonSupportMock
@@ -404,8 +405,8 @@ object IdTokenVerifierTest {
       List(
         Right(JoseHeader(keyId = "f9d97b4cae90bcd76aeb20026f6b770cac221783", algorithm = Algorithm.Rs256)),
         Right(JoseHeader(keyId = "11e03f39b8d300c8c9a1b800ddebfcfde4152c0c", algorithm = Algorithm.Rs256)),
-        Left("Unsupported algorithm: none"),
-        Left("Unsupported algorithm: HS256")
+        Left(s"${JsonSupport.unsupportedAlgorithmErrorPrefix}none"),
+        Left(s"${JsonSupport.unsupportedAlgorithmErrorPrefix}HS256")
       )
 
   }
