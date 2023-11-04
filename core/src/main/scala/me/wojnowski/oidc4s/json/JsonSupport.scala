@@ -11,3 +11,7 @@ trait JsonSupport {
   implicit def openIdConfigDecoder: JsonDecoder[OpenIdConfig]
   implicit def jwksDecoder: JsonDecoder[JsonWebKeySet]
 }
+
+object JsonSupport {
+  private[oidc4s] val unsupportedAlgorithmErrorPrefix = "Unsupported algorithm: "
+}

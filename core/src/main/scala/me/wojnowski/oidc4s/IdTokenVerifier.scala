@@ -118,18 +118,15 @@ object IdTokenVerifier {
       private def ensureNotExpired(now: Instant, expiresAt: Instant): Either[Error.TokenExpired, Unit] =
         Either.raiseWhen(expiresAt.isBefore(now))(TokenExpired(since = expiresAt))
 
-      private def decodeHeader(headerJson: String): Either[Error, JoseHeader] = {
-        val unsupportedAlgorithmPrefix = "Unsupported algorithm: "
-
+      private def decodeHeader(headerJson: String): Either[Error, JoseHeader] =
         JsonDecoder[JoseHeader]
           .decode(headerJson)
           .leftMap {
-            case details if details.startsWith(unsupportedAlgorithmPrefix) =>
-              UnsupportedAlgorithm(details.stripPrefix(unsupportedAlgorithmPrefix))
-            case details                                                   =>
+            case details if details.startsWith(JsonSupport.unsupportedAlgorithmErrorPrefix) =>
+              UnsupportedAlgorithm(details.stripPrefix(JsonSupport.unsupportedAlgorithmErrorPrefix))
+            case details                                                                    =>
               CouldNotDecodeHeader(details)
           }
-      }
 
       private def decodeJwtAndVerifySignature[A: ClaimsDecoder](rawToken: String, key: PublicKey, header: JoseHeader)
         : Either[Error, (A, IdTokenClaims)] =
