@@ -6,7 +6,6 @@ import cats.implicits._
 
 sealed abstract class Algorithm(val name: String, val fullName: String) extends Product with Serializable
 
-// According to OIDC RFC, only RS256 should be supported
 object Algorithm {
   case object Rs256 extends Algorithm(name = "RS256", fullName = "SHA256withRSA")
   case object Rs384 extends Algorithm(name = "RS384", fullName = "SHA384withRSA")
