@@ -125,6 +125,7 @@ object IdTokenVerifier {
             UnsupportedAlgorithm.fromRawError(rawError).getOrElse(CouldNotDecodeHeader(rawError))
           }
 
+      // RFC: https://openid.net/specs/openid-connect-core-1_0.html#ImplicitIDTValidation
       private def decodeJwtAndVerifySignature[A: ClaimsDecoder](rawToken: String, key: PublicKey, header: JoseHeader)
         : Either[Error, (A, IdTokenClaims)] =
         rawToken.split('.') match {
