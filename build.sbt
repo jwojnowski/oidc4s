@@ -87,8 +87,7 @@ lazy val testkit = (project in file("testkit"))
       name := "oidc4s-testkit",
       libraryDependencies ++= Seq(
         "org.scalameta" %% "munit" % Versions.mUnit % Test
-      ),
-      mimaPreviousArtifacts := Set.empty // TODO remove after release
+      )
     )
   )
   .dependsOn(core, circe % "test->compile")
