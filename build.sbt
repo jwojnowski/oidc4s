@@ -81,6 +81,18 @@ lazy val sttp = (project in file("sttp"))
   )
   .dependsOn(core % "compile->compile;test->test")
 
+lazy val testkit = (project in file("testkit"))
+  .settings(
+    commonSettings ++ Seq(
+      name := "oidc4s-testkit",
+      libraryDependencies ++= Seq(
+        "org.scalameta" %% "munit" % Versions.mUnit % Test
+      ),
+      mimaPreviousArtifacts := Set.empty // TODO remove after release
+    )
+  )
+  .dependsOn(core, circe % "test->compile")
+
 lazy val quickSttpCirce = (project in file("quick-sttp-circe"))
   .settings(
     commonSettings ++ Seq(
@@ -94,4 +106,4 @@ lazy val root = (project in file("."))
     publish / skip := true,
     mimaFailOnNoPrevious := false
   )
-  .aggregate(core, circe, sttp, quickSttpCirce)
+  .aggregate(core, circe, sttp, quickSttpCirce, testkit)
