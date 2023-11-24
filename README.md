@@ -153,12 +153,29 @@ Currently available modules:
 "me.wojnowski" %% "oidc4s-core" % "x.y.z"
 "me.wojnowski" %% "oidc4s-circe" % "x.y.z"
 "me.wojnowski" %% "oidc4s-sttp" % "x.y.z"
+"me.wojnowski" %% "oidc4s-testkit" % "x.y.z"
 ```
 
 There's also an aggregation layer exposing handy constructors:
 
 ```scala
 "me.wojnowski" %% "oidc4s-quick-circe-sttp" % "x.y.z"
+```
+
+## Testing
+It might make sense to mock the `IdTokenVerifier` for integration testing
+(like endpoints/route tests, non-trivial security logic testing etc.).
+
+To enable that, there's `IdTokenVerifierMock` provided in `oidc4s-testkit` module.
+
+The simplest possible use comprises of a single line:
+```scala
+val idTokenVerifier: IdTokenVerifier[F] = IdTokenVerifierMock.constSubject(Subject("user-id-1"))
+```
+
+There are, however, more powerful options available, up to:
+```scala
+def constRawClaimsEitherPF[F[_]: Applicative](rawTokenToRawClaimsEither: PartialFunction[String, Either[IdTokenVerifier.Error, String]])(implicit jsonSupport: JsonSupport): IdTokenVerifier[F]
 ```
 
 ## Versioning and binary compatibility
