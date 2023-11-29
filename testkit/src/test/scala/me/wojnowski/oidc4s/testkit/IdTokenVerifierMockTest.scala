@@ -14,7 +14,6 @@ import munit.FunSuite
 import java.time.Instant
 import CirceJsonSupport._
 import cats.data.NonEmptySet
-import cats.data.NonEmptySetImpl
 import cats.effect.Clock
 import me.wojnowski.oidc4s.IdTokenClaims.Audience
 import me.wojnowski.oidc4s.IdTokenClaims.Subject
