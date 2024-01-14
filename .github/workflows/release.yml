@@ -6,11 +6,15 @@ on:
 jobs:
   publish:
     runs-on: ubuntu-20.04
+    strategy:
+      matrix:
+        os: [ ubuntu-latest ]
+        scala: [ 3.3.1 ]
+        java: [ graalvm-ce-java17@22.3.0 ]
     steps:
       - uses: actions/checkout@v3.0.2
         with:
           fetch-depth: 0
-      - uses: olafurpg/setup-scala@v13
       - run: sbt ci-release
         env:
           PGP_PASSPHRASE: ${{ secrets.PGP_PASSPHRASE }}
