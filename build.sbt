@@ -38,7 +38,7 @@ lazy val Versions = new {
 
   val circe = "0.14.6"
 
-  val sttp = "3.9.1"
+  val sttp = "3.9.2"
 
   val jwtScala = "9.4.4"
 
