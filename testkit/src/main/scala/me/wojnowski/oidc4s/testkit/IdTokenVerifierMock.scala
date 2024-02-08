@@ -89,29 +89,15 @@ object IdTokenVerifierMock {
 
   }
 
-  @deprecated("Use version with explicit client ID")
-  def constSubject[F[_]: Applicative: Traverse: Clock](subject: IdTokenClaims.Subject): IdTokenVerifier[F] =
-    constSubject[F](subject, ClientId("https://example.com"))
-
   def constSubject[F[_]: Applicative: Clock](subject: IdTokenClaims.Subject, clientId: ClientId = ClientId("https://example.com"))
     : IdTokenVerifier[F] =
     constSubjectEither[F](Right(subject), clientId)
-
-  @deprecated("Use version with explicit client ID")
-  def constSubjectEither[F[_]: Applicative: Traverse: Clock](errorOrSubject: Either[IdTokenVerifier.Error, IdTokenClaims.Subject])
-    : IdTokenVerifier[F] = constSubjectEither[F](errorOrSubject, ClientId("https://example.com"))
 
   def constSubjectEither[F[_]: Applicative: Clock](
     errorOrSubject: Either[IdTokenVerifier.Error, IdTokenClaims.Subject],
     clientId: ClientId = ClientId("https://example.com")
   ): IdTokenVerifier[F] =
     constSubjectPF[F]((_: String) => errorOrSubject, clientId)
-
-  @deprecated("Use version with explicit client ID")
-  def constSubjectPF[F[_]: Applicative: Traverse: Clock](
-    rawTokenToSubjectPF: PartialFunction[String, Either[IdTokenVerifier.Error, IdTokenClaims.Subject]]
-  ): IdTokenVerifier[F] =
-    constSubjectPF[F](rawTokenToSubjectPF, ClientId("https://example.com"))
 
   def constSubjectPF[F[_]: Applicative: Clock](
     rawTokenToSubjectPF: PartialFunction[String, Either[IdTokenVerifier.Error, IdTokenClaims.Subject]],
@@ -132,19 +118,6 @@ object IdTokenVerifierMock {
         }
       }
     )
-
-  @deprecated("Use constClaims", "0.12.2")
-  def constStandardClaims[F[_]: Applicative: Traverse](claims: IdTokenClaims): IdTokenVerifier[F] = constClaims(claims)
-
-  @deprecated("Use constClaimsEither", "0.12.2")
-  def constStandardClaimsEither[F[_]: Applicative: Traverse](claimsEither: Either[IdTokenVerifier.Error, IdTokenClaims])
-    : IdTokenVerifier[F] =
-    constClaimsEither(claimsEither)
-
-  @deprecated("Use constClaimsEitherPF", "0.12.2")
-  def constStandardClaimsEitherPF[F[_]: Applicative: Traverse](
-    rawTokenToClaimsPF: PartialFunction[String, F[Either[IdTokenVerifier.Error, IdTokenClaims]]]
-  ): IdTokenVerifier[F] = constClaimsEitherPF(rawTokenToClaimsPF)
 
   def constClaims[F[_]: Applicative](claims: IdTokenClaims): IdTokenVerifier[F] = constClaimsEither(Right(claims))
 

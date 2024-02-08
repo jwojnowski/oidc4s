@@ -31,7 +31,7 @@ class IdTokenVerifierMockTest extends FunSuite {
     case `expiredToken` => Left(IdTokenVerifier.Error.TokenExpired(Instant.EPOCH.plusSeconds(30)))
   }
 
-  val standardClaimsMock: IdTokenVerifier[Id] = IdTokenVerifierMock.constStandardClaimsEitherPF {
+  val standardClaimsMock: IdTokenVerifier[Id] = IdTokenVerifierMock.constClaimsEitherPF {
     case `token1`       => Right(standardClaims1)
     case `expiredToken` => Left(IdTokenVerifier.Error.TokenExpired(Instant.EPOCH.plusSeconds(2237)))
   }
