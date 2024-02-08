@@ -26,6 +26,9 @@ trait IdTokenVerifier[F[_]] {
   /** Verifies a token is valid. Returns standard Open ID Token claims. Client ID must be checked manually. */
   def verifyAndDecode(rawToken: String): F[Either[IdTokenVerifier.Error, IdTokenClaims]]
 
+  /** Verifies a token is valid. Returns standard Open ID Token claims. Client ID is verified. */
+  def verifyAndDecode(rawToken: String, expectedClientId: ClientId): F[Either[IdTokenVerifier.Error, IdTokenClaims]]
+
   /** Verifies a token is valid. Returns custom type decoded using provided decoder.
     */
   def verifyAndDecodeCustom[A](rawToken: String)(implicit decoder: ClaimsDecoder[A]): F[Either[IdTokenVerifier.Error, A]]
@@ -78,6 +81,11 @@ object IdTokenVerifier {
 
       override def verifyAndDecode(rawToken: String): F[Either[IdTokenVerifier.Error, IdTokenClaims]] =
         verifyAndDecodeCustom[IdTokenClaims](rawToken)(JsonDecoder[IdTokenClaims].decode(_).map(result => (result, result)))
+
+      override def verifyAndDecode(rawToken: String, expectedClientId: ClientId): F[Either[IdTokenVerifier.Error, IdTokenClaims]] =
+        verifyAndDecodeCustom[IdTokenClaims](rawToken, expectedClientId)(
+          JsonDecoder[IdTokenClaims].decode(_).map(result => (result, result))
+        )
 
       override def verifyAndDecodeCustom[A](rawToken: String)(implicit decoder: ClaimsDecoder[A]): F[Either[Error, A]] =
         internalVerifyAndDecode(rawToken, _ => Either.unit)
