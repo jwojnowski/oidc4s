@@ -50,6 +50,9 @@ object IdTokenVerifierMock {
         }
         .pure[F]
 
+    override def verifyAndDecode(rawToken: String, expectedClientId: ClientId): F[Either[IdTokenVerifier.Error, IdTokenClaims]] =
+      verifyAndDecode(rawToken).map(_.filterOrElse(_.matchesClientId(expectedClientId), IdTokenVerifier.Error.ClientIdDoesNotMatch))
+
     override def verifyAndDecodeCustom[A](rawToken: String)(implicit decoder: ClaimsDecoder[A]): F[Either[IdTokenVerifier.Error, A]] =
       rawTokenToRawClaimsEither
         .lift(rawToken)
@@ -159,6 +162,9 @@ object IdTokenVerifierMock {
           .toRight(IdTokenVerifier.Error.MalformedToken: IdTokenVerifier.Error)
           .sequence
       )(_.flatten)
+
+    override def verifyAndDecode(rawToken: String, expectedClientId: ClientId): F[Either[IdTokenVerifier.Error, IdTokenClaims]] =
+      verifyAndDecode(rawToken).map(_.filterOrElse(_.matchesClientId(expectedClientId), IdTokenVerifier.Error.ClientIdDoesNotMatch))
 
     override def verify(rawToken: String, expectedClientId: ClientId): F[Either[IdTokenVerifier.Error, IdTokenClaims.Subject]] =
       Applicative[F].map(verifyAndDecode(rawToken)) {
