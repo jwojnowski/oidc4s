@@ -46,14 +46,6 @@ object PublicKeyProvider {
       .traverse { case (keyId, key) => KeyUtils.parsePublicPemKey(key).map(keyId -> _) }
       .map(keyIdToKeyList => static(keyIdToKeyList.toMap))
 
-  @deprecated("Use discovery", "0.11.0")
-  def jwks[F[_]: Monad](
-    discovery: OpenIdConnectDiscovery[F]
-  )(
-    transport: Transport[F],
-    jsonSupport: JsonSupport
-  ): PublicKeyProvider[F] = this.discovery(discovery)(transport, jsonSupport)
-
   def discovery[F[_]: Monad](
     discovery: OpenIdConnectDiscovery[F]
   )(

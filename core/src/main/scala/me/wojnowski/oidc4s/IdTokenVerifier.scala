@@ -42,14 +42,6 @@ trait IdTokenVerifier[F[_]] {
 
 object IdTokenVerifier {
 
-  @deprecated("Use instance", "0.11.0")
-  def create[F[_]: Monad: Clock](
-    publicKeyProvider: PublicKeyProvider[F],
-    discovery: OpenIdConnectDiscovery[F],
-    jsonSupport: JsonSupport
-  ): IdTokenVerifier[F] =
-    this.discovery(publicKeyProvider, discovery, jsonSupport)
-
   def discovery[F[_]: Monad: Clock](
     publicKeyProvider: PublicKeyProvider[F],
     discovery: OpenIdConnectDiscovery[F],
