@@ -26,7 +26,8 @@ inThisBuild(
 
 val commonSettings = Seq(
   makePom / publishArtifact := true,
-  mimaPreviousArtifacts := previousStableVersion.value.map(organization.value %% moduleName.value % _).toSet
+//  mimaPreviousArtifacts := previousStableVersion.value.map(organization.value %% moduleName.value % _).toSet
+  mimaPreviousArtifacts := Set.empty
 )
 
 lazy val Versions = new {
