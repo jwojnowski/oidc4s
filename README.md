@@ -159,7 +159,7 @@ Currently available modules:
 There's also an aggregation layer exposing handy constructors:
 
 ```scala
-"me.wojnowski" %% "oidc4s-quick-circe-sttp" % "x.y.z"
+"me.wojnowski" %% "oidc4s-quick-sttp-circe" % "x.y.z"
 ```
 
 ## Testing
