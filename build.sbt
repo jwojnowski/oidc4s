@@ -43,8 +43,8 @@ lazy val Versions = new {
 
   val jwtScala = "9.4.4"
 
-  val mUnit = "0.7.29"
-  val mUnitCatsEffect = "1.0.7"
+  val mUnit = "1.0.0"
+  val mUnitCatsEffect = "2.0.0"
 
 }
 
@@ -54,10 +54,10 @@ lazy val core = (project in file("core")).settings(
     libraryDependencies += "org.typelevel" %% "cats-core" % Versions.cats.core,
     libraryDependencies += "org.typelevel" %% "cats-effect" % Versions.cats.effect,
     libraryDependencies += "org.scalameta" %% "munit" % Versions.mUnit % Test,
-    libraryDependencies += "org.typelevel" %% "munit-cats-effect-3" % Versions.mUnitCatsEffect % Test,
+    libraryDependencies += "org.typelevel" %% "munit-cats-effect" % Versions.mUnitCatsEffect % Test,
     libraryDependencies += "org.typelevel" %% "cats-effect-testkit" % Versions.cats.effect % Test,
-    libraryDependencies += "org.scalameta" %% "munit-scalacheck" % "0.7.29" % Test,
-    libraryDependencies += "org.typelevel" %% "scalacheck-effect-munit" % "1.0.4" % Test,
+    libraryDependencies += "org.scalameta" %% "munit-scalacheck" % Versions.mUnit % Test,
+    libraryDependencies += "org.typelevel" %% "scalacheck-effect-munit" % "2.0.0-M2" % Test,
     libraryDependencies += "com.github.jwt-scala" %% "jwt-core" % "10.0.1" % Test
   )
 )
