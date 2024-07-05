@@ -29,7 +29,7 @@ import scala.concurrent.duration.FiniteDuration
 
 class PropertyIdTokenVerifierTest extends CatsEffectSuite with ScalaCheckEffectSuite {
 
-  override val munitTimeout: FiniteDuration = 90.seconds
+  override val munitIOTimeout: FiniteDuration = 90.seconds
 
   override protected def scalaCheckTestParameters: Test.Parameters = Parameters.default.withMinSuccessfulTests(30)
 
