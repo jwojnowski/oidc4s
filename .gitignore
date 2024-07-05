@@ -150,3 +150,8 @@ hs_err_pid*
 
 # End of https://www.gitignore.io/api/java,scala,intellij+iml,osx,linux,sbt
 #---
+
+# metals
+.metals/
+metals.sbt
+.vscode
