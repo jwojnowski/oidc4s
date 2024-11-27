@@ -34,7 +34,7 @@ lazy val Versions = new {
 
   val cats = new {
     val core = "2.12.0"
-    val effect = "3.5.6"
+    val effect = "3.5.7"
   }
 
   val circe = "0.14.10"
