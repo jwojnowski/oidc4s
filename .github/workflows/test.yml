@@ -25,6 +25,17 @@ jobs:
       - uses: actions/checkout@v3
         with:
           fetch-depth: 0
+      - name: Setup sbt
+        uses: sbt/setup-sbt@v1
+
+      - name: Setup Java (temurin@21)
+        id: setup-java-temurin-21
+        if: matrix.java == 'temurin@21'
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+          cache: sbt
       - name: Check commit message for breaking changes
         id: breaking-commit-message
         run: |
