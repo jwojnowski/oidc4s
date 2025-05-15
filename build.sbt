@@ -18,9 +18,7 @@ inThisBuild(
         "29680262+jwojnowski@users.noreply.github.com",
         url("https://github.com/jwojnowski")
       )
-    ),
-    sonatypeCredentialHost := "s01.oss.sonatype.org",
-    sonatypeRepository := "https://s01.oss.sonatype.org/service/local"
+    )
   )
 )
 
