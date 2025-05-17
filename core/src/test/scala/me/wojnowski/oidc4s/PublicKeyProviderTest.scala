@@ -1,10 +1,5 @@
 package me.wojnowski.oidc4s
 
-import cats.Id
-import cats.data.NonEmptyVector
-import cats.effect.IO
-import cats.effect.Ref
-import cats.syntax.all._
 import me.wojnowski.oidc4s.PublicKeyProvider.JsonWebKey
 import me.wojnowski.oidc4s.PublicKeyProvider.JsonWebKeySet
 import me.wojnowski.oidc4s.PublicKeyProvider.KeyId
@@ -16,9 +11,16 @@ import me.wojnowski.oidc4s.mocks.CacheMock
 import me.wojnowski.oidc4s.mocks.HttpTransportMock
 import me.wojnowski.oidc4s.mocks.JsonSupportMock
 import me.wojnowski.oidc4s.transport.Transport
-import munit.CatsEffectSuite
+
+import cats.Id
+import cats.data.NonEmptyVector
+import cats.effect.IO
+import cats.effect.Ref
+import cats.syntax.all._
 
 import java.security.PublicKey
+
+import munit.CatsEffectSuite
 
 class PublicKeyProviderTest extends CatsEffectSuite {
 

@@ -1,9 +1,10 @@
 package me.wojnowski.oidc4s.mocks
 
-import cats.Applicative
-import cats.syntax.all._
 import me.wojnowski.oidc4s.transport.Transport
 import me.wojnowski.oidc4s.transport.Transport.Response
+
+import cats.Applicative
+import cats.syntax.all._
 
 object HttpTransportMock {
 

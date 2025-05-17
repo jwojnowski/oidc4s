@@ -1,26 +1,29 @@
 package me.wojnowski.oidc4s.testkit
 
-import cats.Applicative
-import cats.Id
-import io.circe.Decoder
-import me.wojnowski.oidc4s.json.JsonSupport
-import me.wojnowski.oidc4s.json.circe.CirceJsonSupport
 import me.wojnowski.oidc4s.ClientId
 import me.wojnowski.oidc4s.IdTokenClaims
-import me.wojnowski.oidc4s.IdTokenVerifier
-import me.wojnowski.oidc4s.Issuer
-import munit.FunSuite
-
-import java.time.Instant
-import CirceJsonSupport._
-import cats.data.NonEmptySet
-import cats.effect.Clock
 import me.wojnowski.oidc4s.IdTokenClaims.Audience
 import me.wojnowski.oidc4s.IdTokenClaims.Subject
+import me.wojnowski.oidc4s.IdTokenVerifier
+import me.wojnowski.oidc4s.Issuer
+import me.wojnowski.oidc4s.json.JsonSupport
+import me.wojnowski.oidc4s.json.circe.CirceJsonSupport
 import me.wojnowski.oidc4s.testkit.IdTokenVerifierMockTest._
+
+import cats.Applicative
+import cats.Id
+import cats.data.NonEmptySet
+import cats.effect.Clock
 
 import scala.concurrent.duration.Duration
 import scala.concurrent.duration.FiniteDuration
+
+import java.time.Instant
+
+import io.circe.Decoder
+import munit.FunSuite
+
+import CirceJsonSupport._
 
 class IdTokenVerifierMockTest extends FunSuite {
   implicit val circeJsonSupport: JsonSupport = CirceJsonSupport

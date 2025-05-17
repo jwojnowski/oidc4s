@@ -6,9 +6,10 @@ import cats.effect.Ref
 import cats.effect.Sync
 import cats.syntax.all._
 
-import java.time.Instant
 import scala.concurrent.duration.DAYS
 import scala.concurrent.duration.FiniteDuration
+
+import java.time.Instant
 
 trait Cache[F[_], A] {
   def get: F[Option[A]]

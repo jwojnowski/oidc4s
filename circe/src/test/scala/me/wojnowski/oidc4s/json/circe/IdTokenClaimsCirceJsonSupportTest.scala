@@ -1,15 +1,18 @@
 package me.wojnowski.oidc4s.json.circe
 
-import cats.data.NonEmptySet
-import io.circe.Decoder
-import me.wojnowski.oidc4s.IdTokenClaims._
 import me.wojnowski.oidc4s.IdTokenClaims
+import me.wojnowski.oidc4s.IdTokenClaims._
 import me.wojnowski.oidc4s.Issuer
 import me.wojnowski.oidc4s.json.JsonDecoder.ClaimsDecoder
-import munit.FunSuite
+
+import cats.data.NonEmptySet
+
+import scala.io.Source
 
 import java.time.Instant
-import scala.io.Source
+
+import io.circe.Decoder
+import munit.FunSuite
 
 class IdTokenClaimsCirceJsonSupportTest extends FunSuite {
   test("Single-audience, full token") {

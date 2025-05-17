@@ -3,8 +3,9 @@ package me.wojnowski.oidc4s.impure
 import cats.Applicative
 import cats.effect.Clock
 
-import java.util.concurrent.TimeUnit
 import scala.concurrent.duration.FiniteDuration
+
+import java.util.concurrent.TimeUnit
 
 package object implicits {
 

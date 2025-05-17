@@ -1,19 +1,22 @@
 package me.wojnowski.oidc4s.transport.sttp
 
-import cats.syntax.all._
 import me.wojnowski.oidc4s.transport.Transport
 import me.wojnowski.oidc4s.transport.Transport.Error
+
+import cats.syntax.all._
+
+import scala.concurrent.duration.Duration
+import scala.concurrent.duration.FiniteDuration
+import scala.util.Try
+import scala.util.control.NonFatal
+
+import java.util.concurrent.TimeUnit
+
 import sttp.client3._
 import sttp.model.HeaderNames
 import sttp.model.headers.CacheDirective
 import sttp.monad.MonadError
 import sttp.monad.syntax._
-
-import java.util.concurrent.TimeUnit
-import scala.concurrent.duration.Duration
-import scala.concurrent.duration.FiniteDuration
-import scala.util.Try
-import scala.util.control.NonFatal
 
 object SttpTransport {
 

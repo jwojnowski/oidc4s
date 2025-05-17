@@ -1,11 +1,5 @@
 package me.wojnowski.oidc4s
 
-import cats.Applicative
-import cats.data.NonEmptySet
-import cats.data.NonEmptyVector
-import cats.effect.IO
-import cats.effect.testkit.TestControl
-import cats.syntax.all._
 import me.wojnowski.oidc4s.IdTokenClaims._
 import me.wojnowski.oidc4s.IdTokenVerifier.Error._
 import me.wojnowski.oidc4s.PublicKeyProvider.KeyId
@@ -18,11 +12,20 @@ import me.wojnowski.oidc4s.json.JsonDecoder
 import me.wojnowski.oidc4s.mocks.CacheMock
 import me.wojnowski.oidc4s.mocks.HttpTransportMock
 import me.wojnowski.oidc4s.mocks.JsonSupportMock
-import munit.CatsEffectSuite
+
+import cats.Applicative
+import cats.data.NonEmptySet
+import cats.data.NonEmptyVector
+import cats.effect.IO
+import cats.effect.testkit.TestControl
+import cats.syntax.all._
+
+import scala.annotation.unused
 
 import java.security.PublicKey
 import java.time.Instant
-import scala.annotation.unused
+
+import munit.CatsEffectSuite
 
 //noinspection ZeroIndexToHead
 class IdTokenVerifierTest extends CatsEffectSuite {

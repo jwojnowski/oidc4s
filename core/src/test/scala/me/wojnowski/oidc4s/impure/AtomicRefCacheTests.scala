@@ -3,9 +3,10 @@ package me.wojnowski.oidc4s.impure
 import cats.effect.IO
 import cats.effect.testkit.TestControl
 import cats.syntax.all._
-import munit.CatsEffectSuite
 
 import scala.concurrent.duration.DurationInt
+
+import munit.CatsEffectSuite
 
 class AtomicRefCacheTests extends CatsEffectSuite {
   private val expiration = 10.minutes

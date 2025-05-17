@@ -3,9 +3,10 @@ package me.wojnowski.oidc4s.json.circe
 import me.wojnowski.oidc4s.Issuer
 import me.wojnowski.oidc4s.config
 import me.wojnowski.oidc4s.json.circe.CirceJsonSupport
-import munit.FunSuite
 
 import scala.io.Source
+
+import munit.FunSuite
 
 class OpenIdConfigCirceJsonSupport extends FunSuite {
   test("Correct config") {
