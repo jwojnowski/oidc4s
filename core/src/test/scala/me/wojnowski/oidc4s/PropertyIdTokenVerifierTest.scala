@@ -1,21 +1,22 @@
 package me.wojnowski.oidc4s
 
-import cats.data.NonEmptySet
-import cats.effect.IO
-import cats.effect.testkit.TestControl
-import cats.implicits._
 import me.wojnowski.oidc4s.IdTokenClaims.Audience
 import me.wojnowski.oidc4s.IdTokenClaims.Subject
 import me.wojnowski.oidc4s.PropertyIdTokenVerifierTest._
 import me.wojnowski.oidc4s.mocks.JsonSupportMock
-import munit.CatsEffectSuite
-import munit.ScalaCheckEffectSuite
-import org.scalacheck.Test.Parameters
+
+import cats.data.NonEmptySet
+import cats.effect.IO
+import cats.effect.testkit.TestControl
+import cats.implicits._
+
 import org.scalacheck.Gen
 import org.scalacheck.Test
+import org.scalacheck.Test.Parameters
 import org.scalacheck.effect.PropF.forAllF
-import pdi.jwt.Jwt
-import pdi.jwt.JwtClaim
+
+import scala.concurrent.duration.DurationLong
+import scala.concurrent.duration.FiniteDuration
 
 import java.security.KeyPairGenerator
 import java.security.PrivateKey
@@ -24,8 +25,11 @@ import java.time.Clock
 import java.time.Instant
 import java.time.ZoneId
 import java.util.UUID
-import scala.concurrent.duration.DurationLong
-import scala.concurrent.duration.FiniteDuration
+
+import munit.CatsEffectSuite
+import munit.ScalaCheckEffectSuite
+import pdi.jwt.Jwt
+import pdi.jwt.JwtClaim
 
 class PropertyIdTokenVerifierTest extends CatsEffectSuite with ScalaCheckEffectSuite {
 

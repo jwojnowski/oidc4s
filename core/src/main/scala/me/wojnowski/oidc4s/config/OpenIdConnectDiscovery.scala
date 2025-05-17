@@ -1,8 +1,5 @@
 package me.wojnowski.oidc4s.config
 
-import cats.Monad
-import cats.data.EitherT
-import cats.syntax.all._
 import me.wojnowski.oidc4s.Cache
 import me.wojnowski.oidc4s.ProductSerializableNoStackTrace
 import me.wojnowski.oidc4s.config.OpenIdConnectDiscovery.Error.CouldNotDecodeResponse
@@ -10,6 +7,10 @@ import me.wojnowski.oidc4s.config.OpenIdConnectDiscovery.Error.CouldNotFetchResp
 import me.wojnowski.oidc4s.json.JsonDecoder
 import me.wojnowski.oidc4s.json.JsonSupport
 import me.wojnowski.oidc4s.transport.Transport
+
+import cats.Monad
+import cats.data.EitherT
+import cats.syntax.all._
 
 trait OpenIdConnectDiscovery[F[_]] {
   def getConfig: F[Either[OpenIdConnectDiscovery.Error, OpenIdConfig]]

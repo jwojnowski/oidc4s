@@ -3,6 +3,7 @@ package me.wojnowski.oidc4s.json.circe
 import me.wojnowski.oidc4s.PublicKeyProvider.JsonWebKey
 import me.wojnowski.oidc4s.PublicKeyProvider.JsonWebKeySet
 import me.wojnowski.oidc4s.json.circe.CirceJsonSupport
+
 import munit.FunSuite
 
 class JwksCirceJsonSupportTest extends FunSuite {

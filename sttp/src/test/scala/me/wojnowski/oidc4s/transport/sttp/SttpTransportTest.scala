@@ -4,6 +4,11 @@ import me.wojnowski.oidc4s.transport.Transport
 import me.wojnowski.oidc4s.transport.Transport.Error.InvalidUrl
 import me.wojnowski.oidc4s.transport.Transport.Error.UnexpectedError
 import me.wojnowski.oidc4s.transport.Transport.Error.UnexpectedResponse
+
+import scala.concurrent.duration.FiniteDuration
+import scala.util.Success
+import scala.util.Try
+
 import munit.FunSuite
 import sttp.client3.Response
 import sttp.client3.UriContext
@@ -13,10 +18,6 @@ import sttp.model.HeaderNames
 import sttp.model.Method
 import sttp.model.StatusCode
 import sttp.monad.TryMonad
-
-import scala.concurrent.duration.FiniteDuration
-import scala.util.Success
-import scala.util.Try
 
 class SttpTransportTest extends FunSuite {
 

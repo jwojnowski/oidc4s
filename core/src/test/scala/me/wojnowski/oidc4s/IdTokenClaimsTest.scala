@@ -1,10 +1,12 @@
 package me.wojnowski.oidc4s
 
-import cats.data.NonEmptySet
 import me.wojnowski.oidc4s.IdTokenClaims._
-import munit.FunSuite
+
+import cats.data.NonEmptySet
 
 import java.time.Instant
+
+import munit.FunSuite
 
 class IdTokenClaimsTest extends FunSuite {
   private val clientId = ClientId("client-id")

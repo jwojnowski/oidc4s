@@ -1,9 +1,10 @@
 package me.wojnowski.oidc4s.json.circe
 
-import io.circe.Decoder
 import me.wojnowski.oidc4s.PublicKeyProvider.JsonWebKey
 import me.wojnowski.oidc4s.PublicKeyProvider.JsonWebKeySet
 import me.wojnowski.oidc4s.PublicKeyProvider.KeyId
+
+import io.circe.Decoder
 
 trait JsonWebKeySetCirceDecoder {
 

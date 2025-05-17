@@ -1,12 +1,14 @@
 package me.wojnowski.oidc4s.json.circe
 
-import cats.data.NonEmptySet
-import io.circe.Decoder
 import me.wojnowski.oidc4s.IdTokenClaims
 import me.wojnowski.oidc4s.IdTokenClaims._
 import me.wojnowski.oidc4s.Issuer
 
+import cats.data.NonEmptySet
+
 import java.time.Instant
+
+import io.circe.Decoder
 
 trait IdTokenCirceDecoder extends IssuerCirceDecoder with AudienceCirceDecoder {
 

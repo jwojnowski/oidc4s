@@ -1,9 +1,10 @@
 package me.wojnowski.oidc4s.json.circe
 
-import io.circe.Decoder
 import me.wojnowski.oidc4s.Algorithm
 import me.wojnowski.oidc4s.IdTokenVerifier.Error.UnsupportedAlgorithm
 import me.wojnowski.oidc4s.JoseHeader
+
+import io.circe.Decoder
 
 trait JoseHeaderCirceDecoder {
 

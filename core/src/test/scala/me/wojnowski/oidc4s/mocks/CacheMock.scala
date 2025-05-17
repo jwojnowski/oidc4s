@@ -1,10 +1,11 @@
 package me.wojnowski.oidc4s.mocks
 
+import me.wojnowski.oidc4s.Cache
+
 import cats.data.NonEmptyVector
 import cats.effect.Ref
 import cats.effect.Sync
 import cats.syntax.all._
-import me.wojnowski.oidc4s.Cache
 
 import scala.concurrent.duration.FiniteDuration
 

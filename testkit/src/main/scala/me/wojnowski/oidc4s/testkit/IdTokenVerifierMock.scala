@@ -1,18 +1,20 @@
 package me.wojnowski.oidc4s.testkit
 
+import me.wojnowski.oidc4s.ClientId
+import me.wojnowski.oidc4s.IdTokenClaims
+import me.wojnowski.oidc4s.IdTokenClaims.Audience
+import me.wojnowski.oidc4s.IdTokenVerifier
+import me.wojnowski.oidc4s.IdTokenVerifier.Error.CouldNotDecodeClaim
+import me.wojnowski.oidc4s.Issuer
+import me.wojnowski.oidc4s.json.JsonDecoder
+import me.wojnowski.oidc4s.json.JsonDecoder.ClaimsDecoder
+import me.wojnowski.oidc4s.json.JsonSupport
+
 import cats.Applicative
 import cats.data.NonEmptySet
 import cats.effect.Clock
 import cats.implicits._
-import me.wojnowski.oidc4s.IdTokenClaims.Audience
-import me.wojnowski.oidc4s.IdTokenVerifier.Error.CouldNotDecodeClaim
-import me.wojnowski.oidc4s.ClientId
-import me.wojnowski.oidc4s.IdTokenClaims
-import me.wojnowski.oidc4s.IdTokenVerifier
-import me.wojnowski.oidc4s.Issuer
-import me.wojnowski.oidc4s.json.JsonDecoder.ClaimsDecoder
-import me.wojnowski.oidc4s.json.JsonDecoder
-import me.wojnowski.oidc4s.json.JsonSupport
+
 import scala.annotation.unused
 
 object IdTokenVerifierMock {

@@ -3,6 +3,7 @@ package me.wojnowski.oidc4s.json.circe
 import me.wojnowski.oidc4s.Algorithm
 import me.wojnowski.oidc4s.JoseHeader
 import me.wojnowski.oidc4s.json.circe.CirceJsonSupport
+
 import munit.FunSuite
 
 class JoseHeaderCirceJsonSupportTest extends FunSuite {

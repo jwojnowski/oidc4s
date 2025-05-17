@@ -1,10 +1,12 @@
 package me.wojnowski.oidc4s.json.circe
 
-import cats.data.NonEmptySet
-import io.circe.Decoder
 import me.wojnowski.oidc4s.IdTokenClaims.Audience
 
+import cats.data.NonEmptySet
+
 import scala.collection.immutable.SortedSet
+
+import io.circe.Decoder
 
 trait AudienceCirceDecoder {
   protected implicit val audienceDecoder: Decoder[Audience] =

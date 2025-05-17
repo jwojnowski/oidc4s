@@ -3,12 +3,14 @@ package me.wojnowski.oidc4s
 import me.wojnowski.oidc4s.PublicKeyProvider.Error
 import me.wojnowski.oidc4s.PublicKeyProvider.Error.CouldNotDecodePublicKey
 
+import cats.implicits._
+
+import scala.util.Try
+
 import java.security.KeyFactory
 import java.security.PublicKey
 import java.security.spec.X509EncodedKeySpec
 import java.util.Base64
-import scala.util.Try
-import cats.implicits._
 
 object KeyUtils {
   private val keyFactory = KeyFactory.getInstance("RSA")

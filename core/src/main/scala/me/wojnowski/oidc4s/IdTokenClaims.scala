@@ -1,10 +1,11 @@
 package me.wojnowski.oidc4s
 
-import cats.data.NonEmptySet
+import me.wojnowski.oidc4s.IdTokenClaims._
+
 import cats.Eq
 import cats.Order
+import cats.data.NonEmptySet
 import cats.syntax.all._
-import me.wojnowski.oidc4s.IdTokenClaims._
 
 import java.time.Instant
 

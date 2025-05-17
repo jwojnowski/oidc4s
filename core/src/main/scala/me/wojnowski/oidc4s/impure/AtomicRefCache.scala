@@ -1,14 +1,16 @@
 package me.wojnowski.oidc4s.impure
 
-import cats.Monad
-import cats.effect.Clock
-import cats.syntax.all._
 import me.wojnowski.oidc4s.Cache
 import me.wojnowski.oidc4s.Cache.DefaultExpiration
 import me.wojnowski.oidc4s.Cache.Entry
 
-import java.util.concurrent.atomic.AtomicReference
+import cats.Monad
+import cats.effect.Clock
+import cats.syntax.all._
+
 import scala.concurrent.duration.FiniteDuration
+
+import java.util.concurrent.atomic.AtomicReference
 
 case class AtomicRefCache[F[_]: Monad: Clock, A](defaultExpiration: FiniteDuration = DefaultExpiration) extends Cache[F, A] {
   // Used directly instead of cats.effect.Ref[], as this particular use

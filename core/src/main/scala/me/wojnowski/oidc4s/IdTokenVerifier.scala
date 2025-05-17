@@ -1,22 +1,24 @@
 package me.wojnowski.oidc4s
 
+import me.wojnowski.oidc4s.IdTokenVerifier.Error._
+import me.wojnowski.oidc4s.config.OpenIdConnectDiscovery
+import me.wojnowski.oidc4s.json.JsonDecoder
+import me.wojnowski.oidc4s.json.JsonDecoder.ClaimsDecoder
+import me.wojnowski.oidc4s.json.JsonSupport
+
 import cats.Monad
 import cats.data.EitherT
 import cats.effect.Clock
 import cats.syntax.all._
-import me.wojnowski.oidc4s.IdTokenVerifier.Error._
-import me.wojnowski.oidc4s.config.OpenIdConnectDiscovery
-import me.wojnowski.oidc4s.json.JsonDecoder.ClaimsDecoder
-import me.wojnowski.oidc4s.json.JsonDecoder
-import me.wojnowski.oidc4s.json.JsonSupport
+
+import scala.util.Success
+import scala.util.Try
 
 import java.nio.charset.StandardCharsets
 import java.security.PublicKey
 import java.security.Signature
 import java.time.Instant
 import java.util.Base64
-import scala.util.Success
-import scala.util.Try
 
 trait IdTokenVerifier[F[_]] {
 
