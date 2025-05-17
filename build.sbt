@@ -1,31 +1,24 @@
 val Scala213 = "2.13.16"
 val Scala3 = "3.7.0"
 
+ThisBuild / tlBaseVersion := "0.13"
+
 ThisBuild / scalaVersion := Scala213
 ThisBuild / crossScalaVersions := Seq(Scala213, Scala3)
 ThisBuild / organization := "me.wojnowski"
 ThisBuild / versionScheme := Some("early-semver")
-
-inThisBuild(
-  List(
-    organization := "me.wojnowski",
-    homepage := Some(url("https://github.com/jwojnowski/oidc4s")),
-    licenses := List("MIT License" -> url("https://opensource.org/licenses/MIT")),
-    developers := List(
-      Developer(
-        "jwojnowski",
-        "Jakub Wojnowski",
-        "29680262+jwojnowski@users.noreply.github.com",
-        url("https://github.com/jwojnowski")
-      )
-    )
-  )
+ThisBuild / licenses := Seq(License.MIT)
+ThisBuild / developers := List(
+  tlGitHubDev("jwojnowski", "Jakub Wojnowski")
 )
 
+ThisBuild / tlCiReleaseBranches := Seq()
+ThisBuild / tlCiHeaderCheck := false
+ThisBuild / tlCiScalafixCheck := false
+ThisBuild / githubWorkflowJavaVersions := Seq(JavaSpec.temurin("21"))
+
 val commonSettings = Seq(
-  makePom / publishArtifact := true,
-//  mimaPreviousArtifacts := previousStableVersion.value.map(organization.value %% moduleName.value % _).toSet
-  mimaPreviousArtifacts := Set.empty
+  makePom / publishArtifact := true
 )
 
 lazy val Versions = new {
@@ -100,9 +93,4 @@ lazy val quickSttpCirce = (project in file("quick-sttp-circe"))
   )
   .dependsOn(core, circe, sttp)
 
-lazy val root = (project in file("."))
-  .settings(
-    publish / skip := true,
-    mimaFailOnNoPrevious := false
-  )
-  .aggregate(core, circe, sttp, quickSttpCirce, testkit)
+lazy val root = tlCrossRootProject.aggregate(core, circe, sttp, quickSttpCirce, testkit)
