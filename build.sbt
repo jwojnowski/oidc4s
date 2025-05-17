@@ -14,7 +14,7 @@ ThisBuild / developers := List(
 
 ThisBuild / tlCiReleaseBranches := Seq()
 ThisBuild / tlCiHeaderCheck := false
-ThisBuild / tlCiScalafixCheck := false
+ThisBuild / tlCiScalafixCheck := true
 ThisBuild / githubWorkflowJavaVersions := Seq(JavaSpec.temurin("21"))
 
 val commonSettings = Seq(
