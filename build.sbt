@@ -93,4 +93,13 @@ lazy val quickSttpCirce = (project in file("quick-sttp-circe"))
   )
   .dependsOn(core, circe, sttp)
 
-lazy val root = tlCrossRootProject.aggregate(core, circe, sttp, quickSttpCirce, testkit)
+lazy val root =
+  tlCrossRootProject
+    .settings(name := "oidc4s")
+    .aggregate(
+      core,
+      circe,
+      sttp,
+      quickSttpCirce,
+      testkit
+    )
