@@ -15,7 +15,6 @@ import me.wojnowski.oidc4s.config.Location
 import me.wojnowski.oidc4s.config.OpenIdConfig
 import me.wojnowski.oidc4s.config.OpenIdConnectDiscovery
 import me.wojnowski.oidc4s.json.JsonDecoder
-import me.wojnowski.oidc4s.json.JsonSupport
 import me.wojnowski.oidc4s.mocks.CacheMock
 import me.wojnowski.oidc4s.mocks.HttpTransportMock
 import me.wojnowski.oidc4s.mocks.JsonSupportMock

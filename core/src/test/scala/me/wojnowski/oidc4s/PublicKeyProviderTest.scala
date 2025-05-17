@@ -18,13 +18,9 @@ import me.wojnowski.oidc4s.mocks.JsonSupportMock
 import me.wojnowski.oidc4s.transport.Transport
 import munit.CatsEffectSuite
 
-import java.security.KeyFactory
 import java.security.PublicKey
-import java.security.spec.X509EncodedKeySpec
-import java.util.Base64
 
 class PublicKeyProviderTest extends CatsEffectSuite {
-  private val keyFactory = KeyFactory.getInstance("RSA")
 
   private val jsonWebKeySet =
     JsonWebKeySet(
@@ -187,7 +183,7 @@ class PublicKeyProviderTest extends CatsEffectSuite {
         _     <- cachedKeyProvider.getKey(keyId2) // calls: 0
         _     <- ref.update(_.copy(keys = keys.slice(1, 3)))
         _     <- cachedKeyProvider.getKey(keyId2) // calls: 0
-        x     <- cachedKeyProvider.getKey(keyId3) // calls: 1
+        _     <- cachedKeyProvider.getKey(keyId3) // calls: 1
         _     <- cachedKeyProvider.getKey(keyId3) // calls: 0
         state <- ref.get
       } yield assertEquals(state.requestCount, 2)

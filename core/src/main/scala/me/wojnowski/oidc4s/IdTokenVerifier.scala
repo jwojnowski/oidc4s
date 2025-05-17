@@ -72,11 +72,11 @@ object IdTokenVerifier {
         verifyAndDecode(rawToken).map(_.ensure(Error.ClientIdDoesNotMatch)(_.matchesClientId(expectedClientId)).map(_.subject))
 
       override def verifyAndDecode(rawToken: String): F[Either[IdTokenVerifier.Error, IdTokenClaims]] =
-        verifyAndDecodeCustom[IdTokenClaims](rawToken)(JsonDecoder[IdTokenClaims].decode(_).map(result => (result, result)))
+        verifyAndDecodeCustom[IdTokenClaims](rawToken)(using JsonDecoder[IdTokenClaims].decode(_).map(result => (result, result)))
 
       override def verifyAndDecode(rawToken: String, expectedClientId: ClientId): F[Either[IdTokenVerifier.Error, IdTokenClaims]] =
         verifyAndDecodeCustom[IdTokenClaims](rawToken, expectedClientId)(
-          JsonDecoder[IdTokenClaims].decode(_).map(result => (result, result))
+          using JsonDecoder[IdTokenClaims].decode(_).map(result => (result, result))
         )
 
       override def verifyAndDecodeCustom[A](rawToken: String)(implicit decoder: ClaimsDecoder[A]): F[Either[Error, A]] =
