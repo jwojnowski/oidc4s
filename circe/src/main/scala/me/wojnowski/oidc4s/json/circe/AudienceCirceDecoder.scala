@@ -12,7 +12,7 @@ trait AudienceCirceDecoder {
 
   protected implicit val audienceNesDecoder: Decoder[NonEmptySet[Audience]] =
     Decoder[Audience].map(NonEmptySet.one[Audience]) or Decoder[Set[Audience]].emap { audienceSet =>
-      NonEmptySet.fromSet(SortedSet.from(audienceSet)(Audience.order.toOrdering)).toRight("aud cannot be empty")
+      NonEmptySet.fromSet(SortedSet.from(audienceSet)(using Audience.order.toOrdering)).toRight("aud cannot be empty")
     }
 
 }

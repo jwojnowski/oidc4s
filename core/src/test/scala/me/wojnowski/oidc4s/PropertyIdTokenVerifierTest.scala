@@ -127,7 +127,7 @@ object PropertyIdTokenVerifierTest {
   }
 
   val clockGen: Gen[Clock] =
-    Gen.choose(2137, 1696369856).map { seconds =>
+    Gen.choose(2137L, 1696369856L).map { seconds =>
       java.time.Clock.fixed(Instant.ofEpochSecond(seconds), ZoneId.of("UTC"))
     }
 

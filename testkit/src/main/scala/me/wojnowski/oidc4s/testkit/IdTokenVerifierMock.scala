@@ -1,7 +1,6 @@
 package me.wojnowski.oidc4s.testkit
 
 import cats.Applicative
-import cats.Traverse
 import cats.data.NonEmptySet
 import cats.effect.Clock
 import cats.implicits._
@@ -14,6 +13,7 @@ import me.wojnowski.oidc4s.Issuer
 import me.wojnowski.oidc4s.json.JsonDecoder.ClaimsDecoder
 import me.wojnowski.oidc4s.json.JsonDecoder
 import me.wojnowski.oidc4s.json.JsonSupport
+import scala.annotation.unused
 
 object IdTokenVerifierMock {
 
@@ -150,7 +150,8 @@ object IdTokenVerifierMock {
         }
       }
 
-    override def verifyAndDecodeCustom[A](rawToken: String)(implicit decoder: ClaimsDecoder[A]): F[Either[IdTokenVerifier.Error, A]] =
+    override def verifyAndDecodeCustom[A](rawToken: String)(implicit @unused decoder: ClaimsDecoder[A])
+      : F[Either[IdTokenVerifier.Error, A]] =
       Applicative[F].map(
         rawTokenToClaimsPF
           .lift(rawToken)

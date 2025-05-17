@@ -1,9 +1,6 @@
 package me.wojnowski.oidc4s.json
 
-import cats.data.NonEmptySet
-import me.wojnowski.oidc4s.IdTokenClaims.Audience
 import me.wojnowski.oidc4s.IdTokenClaims
-import me.wojnowski.oidc4s.Issuer
 
 trait JsonDecoder[A] {
   def decode(raw: String): Either[String, A]
