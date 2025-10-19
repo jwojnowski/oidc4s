@@ -81,7 +81,7 @@ object PublicKeyProvider {
         for {
           jwksUri <- EitherT(jwksUriF)
           rawJson <- EitherT(transport.get(jwksUri)).leftMap(Error.CouldNotFetchKeys.apply)
-          keys    <- EitherT.fromEither {
+          keys    <- EitherT.fromEither[F] {
                        JsonDecoder[JsonWebKeySet]
                          .decode(rawJson.data)
                          .map(_.toPublicKeyMap)

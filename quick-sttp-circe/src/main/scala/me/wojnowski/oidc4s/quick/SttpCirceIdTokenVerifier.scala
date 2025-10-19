@@ -63,7 +63,7 @@ object SttpCirceIdTokenVerifier {
   )(
     backend: SttpBackend[F, Any]
   ): IdTokenVerifier[F] =
-    create(OpenIdConnectDiscovery.static(config), publicKeyCache)(backend)
+    create(OpenIdConnectDiscovery.static[F](config), publicKeyCache)(backend)
 
   def create[F[_]: Monad: Clock](
     discovery: OpenIdConnectDiscovery[F],

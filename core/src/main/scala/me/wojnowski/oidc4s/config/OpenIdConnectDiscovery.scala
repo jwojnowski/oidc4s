@@ -42,7 +42,7 @@ object OpenIdConnectDiscovery {
                                    .leftMap(CouldNotFetchResponse.apply)
                                    .leftWiden[Error]
                   config      <- EitherT
-                                   .fromEither(JsonDecoder[OpenIdConfig].decode(rawResponse.data))
+                                   .fromEither[F](JsonDecoder[OpenIdConfig].decode(rawResponse.data))
                                    .leftMap(details => CouldNotDecodeResponse(details))
                                    .leftWiden[Error]
                   _           <- EitherT.liftF[F, Error, Unit](cache.put(config, rawResponse.expiresIn))

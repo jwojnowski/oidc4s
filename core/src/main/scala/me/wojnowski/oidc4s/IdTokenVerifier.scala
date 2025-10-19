@@ -99,10 +99,10 @@ object IdTokenVerifier {
         for {
           issuer     <- EitherT(issuerF)
           now        <- EitherT.liftF(Clock[F].realTimeInstant)
-          headerJson <- EitherT.fromEither(extractHeaderJson(rawToken))
-          header     <- EitherT.fromEither(decodeHeader(headerJson))
+          headerJson <- EitherT.fromEither[F](extractHeaderJson(rawToken))
+          header     <- EitherT.fromEither[F](decodeHeader(headerJson))
           publicKey  <- EitherT(publicKeyProvider.getKey(header.keyId).map(_.leftMap(IdTokenVerifier.Error.CouldNotFindPublicKey.apply)))
-          result     <- EitherT.fromEither {
+          result     <- EitherT.fromEither[F] {
                           decodeJwtAndVerifySignature[A](rawToken, publicKey, header).flatMap { case (claims, standardClaims) =>
                             List(
                               ensureNotExpired(now, standardClaims.expiration),
