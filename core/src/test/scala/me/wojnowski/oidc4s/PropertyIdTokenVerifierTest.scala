@@ -13,7 +13,7 @@ import cats.implicits._
 import org.scalacheck.Gen
 import org.scalacheck.Test
 import org.scalacheck.Test.Parameters
-import org.scalacheck.effect.PropF.forAllF
+import org.scalacheck.effect.PropF
 
 import scala.concurrent.duration.DurationLong
 import scala.concurrent.duration.FiniteDuration
@@ -38,30 +38,40 @@ class PropertyIdTokenVerifierTest extends CatsEffectSuite with ScalaCheckEffectS
   override protected def scalaCheckTestParameters: Test.Parameters = Parameters.default.withMinSuccessfulTests(30)
 
   test("Verification succeeds given correct public key") {
-    forAllF(keyIdGen, matchingKeyPairGen, clockGen, algorithmGen, clientIdGen) {
-      case (keyId, (privateKey, publicKey), clock, algorithm, clientId) =>
-        TestControl.executeEmbed {
-          val (rawJwt, verifier, subject) = prepareJwtAndVerifier(keyId, privateKey, publicKey, clock, algorithm, clientId)
+    PropF.forAllF[IO, UUID, (PrivateKey, PublicKey), Clock, Algorithm, ClientId, IO[Unit]](
+      keyIdGen,
+      matchingKeyPairGen,
+      clockGen,
+      algorithmGen,
+      clientIdGen
+    ) { case (keyId, (privateKey, publicKey), clock, algorithm, clientId) =>
+      TestControl.executeEmbed {
+        val (rawJwt, verifier, subject) = prepareJwtAndVerifier(keyId, privateKey, publicKey, clock, algorithm, clientId)
 
-          for {
-            _      <- IO.sleep(clock.instant.getEpochSecond.seconds)
-            result <- verifier.verify(rawJwt, clientId)
-          } yield assertEquals(result, Right(subject))
-        }
+        for {
+          _      <- IO.sleep(clock.instant.getEpochSecond.seconds)
+          result <- verifier.verify(rawJwt, clientId)
+        } yield assertEquals(result, Right(subject))
+      }
     }
   }
 
   test("Verification fails given incorrect public key") {
-    forAllF(keyIdGen, mismatchedKeyPairGen, clockGen, algorithmGen, clientIdGen) {
-      case (keyId, (privateKey, publicKey), clock, algorithm, clientId) =>
-        TestControl.executeEmbed {
-          val (rawJwt, verifier, _) = prepareJwtAndVerifier(keyId, privateKey, publicKey, clock, algorithm, clientId)
+    PropF.forAllF[IO, UUID, (PrivateKey, PublicKey), Clock, Algorithm, ClientId, IO[Unit]](
+      keyIdGen,
+      mismatchedKeyPairGen,
+      clockGen,
+      algorithmGen,
+      clientIdGen
+    ) { case (keyId, (privateKey, publicKey), clock, algorithm, clientId) =>
+      TestControl.executeEmbed {
+        val (rawJwt, verifier, _) = prepareJwtAndVerifier(keyId, privateKey, publicKey, clock, algorithm, clientId)
 
-          for {
-            _      <- IO.sleep(clock.instant.getEpochSecond.seconds)
-            result <- verifier.verify(rawJwt, clientId)
-          } yield assertEquals(result, Left(IdTokenVerifier.Error.InvalidSignature))
-        }
+        for {
+          _      <- IO.sleep(clock.instant.getEpochSecond.seconds)
+          result <- verifier.verify(rawJwt, clientId)
+        } yield assertEquals(result, Left(IdTokenVerifier.Error.InvalidSignature))
+      }
     }
   }
 

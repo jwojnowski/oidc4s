@@ -61,12 +61,19 @@ object SttpTransport {
                 }
                 .leftWiden[Error]
             )
-            .handleError { case NonFatal(throwable) =>
-              Error.UnexpectedError(throwable).asLeft[Transport.Response].leftWiden[Error].unit
+            .handleError[Error] { case NonFatal(throwable) =>
+              monadError.eval {
+                Error
+                  .UnexpectedError(throwable)
+                  .asLeft[Transport.Response]
+                  .leftWiden[Error]
+              }
             }
 
         case Left(_) =>
-          Error.InvalidUrl(url).asLeft[Transport.Response].leftWiden[Error].unit
+          monadError.eval {
+            Error.InvalidUrl(url).asLeft[Transport.Response].leftWiden[Error]
+          }
 
       }
 
