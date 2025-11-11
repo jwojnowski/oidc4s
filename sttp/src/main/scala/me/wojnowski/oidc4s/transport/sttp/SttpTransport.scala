@@ -12,7 +12,7 @@ import scala.util.control.NonFatal
 
 import java.util.concurrent.TimeUnit
 
-import sttp.client3._
+import sttp.client4._
 import sttp.model.HeaderNames
 import sttp.model.headers.CacheDirective
 import sttp.monad.MonadError
@@ -20,8 +20,8 @@ import sttp.monad.syntax._
 
 object SttpTransport {
 
-  def instance[F[_]](backend: SttpBackend[F, Any]): Transport[F] = new Transport[F] {
-    private implicit val monadError: MonadError[F] = backend.responseMonad
+  def instance[F[_]](backend: Backend[F]): Transport[F] = new Transport[F] {
+    private implicit val monadError: MonadError[F] = backend.monad
 
     override def get(url: String): F[Either[Transport.Error, Transport.Response]] =
       Try(uri"$url").toEither match {
