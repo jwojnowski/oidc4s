@@ -7,26 +7,23 @@ import me.wojnowski.oidc4s.transport.Transport.Error.UnexpectedResponse
 
 import scala.concurrent.duration.FiniteDuration
 import scala.util.Success
-import scala.util.Try
 
 import munit.FunSuite
-import sttp.client3.Response
-import sttp.client3.UriContext
-import sttp.client3.testing.SttpBackendStub
+import sttp.client4.UriContext
+import sttp.client4.testing.ResponseStub
+import sttp.client4.testing.SyncBackendStub
+import sttp.client4.wrappers.TryBackend
 import sttp.model.Header
 import sttp.model.HeaderNames
 import sttp.model.Method
 import sttp.model.StatusCode
-import sttp.monad.TryMonad
 
 class SttpTransportTest extends FunSuite {
 
   val correctUrl = "http://appleid.apple.com/.well-known/openid-configuration"
 
   test("Invalid URL") {
-    val backend: SttpBackendStub[Try, Nothing] = SttpBackendStub(TryMonad)
-
-    val transport = SttpTransport.instance[Try](backend)
+    val transport = SttpTransport.instance(TryBackend(SyncBackendStub))
 
     val invalidUrl = ""
 
@@ -36,12 +33,13 @@ class SttpTransportTest extends FunSuite {
   }
 
   test("Unexpected response") {
-    val backend: SttpBackendStub[Try, Nothing] =
-      SttpBackendStub(TryMonad)
-        .whenAnyRequest
-        .thenRespondWithCode(StatusCode.InternalServerError, "oops")
-
-    val transport = SttpTransport.instance[Try](backend)
+    val transport = SttpTransport.instance(
+      TryBackend(
+        SyncBackendStub
+          .whenAnyRequest
+          .thenRespond(ResponseStub.adjust("oops", StatusCode.InternalServerError))
+      )
+    )
 
     val result = transport.get(correctUrl)
 
@@ -49,23 +47,21 @@ class SttpTransportTest extends FunSuite {
   }
 
   test("Connection error") {
-    val backend: SttpBackendStub[Try, Nothing] =
-      SttpBackendStub(TryMonad)
-
-    val transport = SttpTransport.instance[Try](backend)
+    val transport = SttpTransport.instance(TryBackend(SyncBackendStub))
 
     val result = transport.get(correctUrl)
 
-    assert(result.get.left.forall(_.isInstanceOf[UnexpectedError]))
+    assert(result.get.left.exists(_.isInstanceOf[UnexpectedError]))
   }
 
   test("Correct response (no cache headers)") {
-    val backend: SttpBackendStub[Try, Nothing] =
-      SttpBackendStub(TryMonad)
-        .whenRequestMatches(request => request.method == Method.GET && request.uri == uri"$correctUrl")
-        .thenRespondWithCode(StatusCode.Ok, "data")
-
-    val transport = SttpTransport.instance[Try](backend)
+    val transport = SttpTransport.instance(
+      TryBackend(
+        SyncBackendStub
+          .whenRequestMatches(request => request.method == Method.GET && request.uri == uri"$correctUrl")
+          .thenRespond(ResponseStub.adjust("data", StatusCode.Ok))
+      )
+    )
 
     val result = transport.get(correctUrl)
 
@@ -73,12 +69,15 @@ class SttpTransportTest extends FunSuite {
   }
 
   test("Correct response (invalid cache headers)") {
-    val backend: SttpBackendStub[Try, Nothing] =
-      SttpBackendStub(TryMonad)
-        .whenRequestMatches(request => request.method == Method.GET && request.uri == uri"$correctUrl")
-        .thenRespond(Response("data", StatusCode.Ok, "OK", Seq(Header(HeaderNames.CacheControl, "this-makes-no-sense"))))
-
-    val transport = SttpTransport.instance[Try](backend)
+    val transport = SttpTransport.instance(
+      TryBackend(
+        SyncBackendStub
+          .whenRequestMatches(request => request.method == Method.GET && request.uri == uri"$correctUrl")
+          .thenRespond(
+            ResponseStub.adjust("data", StatusCode.Ok, Seq(Header(HeaderNames.CacheControl, "this-makes-no-sense")))
+          )
+      )
+    )
 
     val result = transport.get(correctUrl)
 
@@ -86,19 +85,19 @@ class SttpTransportTest extends FunSuite {
   }
 
   test("Correct response (valid cache headers, no age)") {
-    val backend: SttpBackendStub[Try, Nothing] =
-      SttpBackendStub(TryMonad)
-        .whenRequestMatches(request => request.method == Method.GET && request.uri == uri"$correctUrl")
-        .thenRespond(
-          Response(
-            "data",
-            StatusCode.Ok,
-            "OK",
-            Seq(Header(HeaderNames.CacheControl, "no-transform,max-age=86400,stale-while-revalidate"))
+    val transport = SttpTransport.instance(
+      TryBackend(
+        SyncBackendStub
+          .whenRequestMatches(request => request.method == Method.GET && request.uri == uri"$correctUrl")
+          .thenRespond(
+            ResponseStub.adjust(
+              "data",
+              StatusCode.Ok,
+              Seq(Header(HeaderNames.CacheControl, "no-transform,max-age=86400,stale-while-revalidate"))
+            )
           )
-        )
-
-    val transport = SttpTransport.instance[Try](backend)
+      )
+    )
 
     val result = transport.get(correctUrl)
 
@@ -106,22 +105,22 @@ class SttpTransportTest extends FunSuite {
   }
 
   test("Correct response (valid cache headers, age present)") {
-    val backend: SttpBackendStub[Try, Nothing] =
-      SttpBackendStub(TryMonad)
-        .whenRequestMatches(request => request.method == Method.GET && request.uri == uri"$correctUrl")
-        .thenRespond(
-          Response(
-            "data",
-            StatusCode.Ok,
-            "OK",
-            Seq(
-              Header(HeaderNames.CacheControl, "no-transform,max-age=86400,stale-while-revalidate"),
-              Header(HeaderNames.Age, "3600")
+    val transport = SttpTransport.instance(
+      TryBackend(
+        SyncBackendStub
+          .whenRequestMatches(request => request.method == Method.GET && request.uri == uri"$correctUrl")
+          .thenRespond(
+            ResponseStub.adjust(
+              "data",
+              StatusCode.Ok,
+              Seq(
+                Header(HeaderNames.CacheControl, "no-transform,max-age=86400,stale-while-revalidate"),
+                Header(HeaderNames.Age, "3600")
+              )
             )
           )
-        )
-
-    val transport = SttpTransport.instance[Try](backend)
+      )
+    )
 
     val result = transport.get(correctUrl)
 

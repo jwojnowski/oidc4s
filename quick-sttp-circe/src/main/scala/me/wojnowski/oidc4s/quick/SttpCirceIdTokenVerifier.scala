@@ -18,7 +18,7 @@ import cats.syntax.all._
 
 import scala.concurrent.duration.FiniteDuration
 
-import sttp.client3.SttpBackend
+import sttp.client4.Backend
 
 object SttpCirceIdTokenVerifier {
 
@@ -26,7 +26,7 @@ object SttpCirceIdTokenVerifier {
     location: Location,
     defaultExpiration: FiniteDuration = Cache.DefaultExpiration
   )(
-    backend: SttpBackend[F, Any]
+    backend: Backend[F]
   ): F[IdTokenVerifier[F]] =
     for {
       configCache    <- Cache.catsRef[F, OpenIdConfig](defaultExpiration)
@@ -37,7 +37,7 @@ object SttpCirceIdTokenVerifier {
     location: Location,
     defaultExpiration: FiniteDuration = Cache.DefaultExpiration
   )(
-    backend: SttpBackend[F, Any]
+    backend: Backend[F]
   ): IdTokenVerifier[F] = {
     val configCache = AtomicRefCache[F, OpenIdConfig](defaultExpiration)
     val publicKeyProviderCache = AtomicRefCache[F, KeyMap](defaultExpiration)
@@ -50,7 +50,7 @@ object SttpCirceIdTokenVerifier {
     configCache: Cache[F, OpenIdConfig],
     publicKeyCache: Cache[F, PublicKeyProvider.KeyMap]
   )(
-    backend: SttpBackend[F, Any]
+    backend: Backend[F]
   ): IdTokenVerifier[F] = {
     val discovery = OpenIdConnectDiscovery.instance[F](location)(SttpTransport.instance(backend), CirceJsonSupport, configCache)
 
@@ -61,7 +61,7 @@ object SttpCirceIdTokenVerifier {
     config: OpenIdConfig,
     publicKeyCache: Option[Cache[F, PublicKeyProvider.KeyMap]]
   )(
-    backend: SttpBackend[F, Any]
+    backend: Backend[F]
   ): IdTokenVerifier[F] =
     create(OpenIdConnectDiscovery.static[F](config), publicKeyCache)(backend)
 
@@ -69,7 +69,7 @@ object SttpCirceIdTokenVerifier {
     discovery: OpenIdConnectDiscovery[F],
     publicKeyCache: Option[Cache[F, KeyMap]]
   )(
-    backend: SttpBackend[F, Any]
+    backend: Backend[F]
   ): IdTokenVerifier[F] = {
     val publicKeyProvider = PublicKeyProvider.discovery(discovery)(SttpTransport.instance(backend), CirceJsonSupport)
 

@@ -49,9 +49,9 @@ and `AtomicReference`-based Cache instance can be used, for example:
 import me.wojnowski.oidc4s.IdTokenVerifier
 import me.wojnowski.oidc4s.config.Location
 import me.wojnowski.oidc4s.impure.implicits._
-import sttp.client3.HttpClientSyncBackend
+import sttp.client4.HttpClientSyncBackend
 
-val backend: SttpBackend[Identity, Any] = HttpClientSyncBackend()
+val backend = HttpClientSyncBackend()
 
 val verifier = SttpCirceIdTokenVerifier.cachedWithAtomicRef[Id](Location.unsafeCreate("https://accounts.google.com"))(backend)
 ```

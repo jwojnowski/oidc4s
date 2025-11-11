@@ -30,7 +30,7 @@ lazy val Versions = new {
 
   val circe = "0.14.15"
 
-  val sttp = "3.11.0"
+  val sttp = "4.0.13"
 
   val jwtScala = "9.4.4"
 
@@ -69,7 +69,7 @@ lazy val sttp = (project in file("sttp"))
   .settings(
     commonSettings ++ Seq(
       name := "oidc4s-sttp",
-      libraryDependencies += "com.softwaremill.sttp.client3" %% "core" % Versions.sttp
+      libraryDependencies += "com.softwaremill.sttp.client4" %% "core" % Versions.sttp
     )
   )
   .dependsOn(core % "compile->compile;test->test")
