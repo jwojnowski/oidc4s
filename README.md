@@ -17,8 +17,10 @@ Scala versions 3.x and 2.13.x are supported.
 To use this library with default Sttp/Circe implementations, add the following dependency to your `build.sbt`:
 
 ```scala
-"me.wojnowski" %% "oidc4s-quick-sttp-circe" % "x.y.z"
+"me.wojnowski" %% "oidc4s-quick-sttp4-circe" % "x.y.z"
 ```
+
+If you need to use Sttp3, use `oidc4s-quick-sttp-circe` instead.
 
 ### Creating `IdTokenVerifier` instance
 
@@ -152,14 +154,16 @@ Currently available modules:
 ```scala
 "me.wojnowski" %% "oidc4s-core" % "x.y.z"
 "me.wojnowski" %% "oidc4s-circe" % "x.y.z"
-"me.wojnowski" %% "oidc4s-sttp" % "x.y.z"
+"me.wojnowski" %% "oidc4s-sttp" % "x.y.z"  // sttp3
+"me.wojnowski" %% "oidc4s-sttp4" % "x.y.z" // sttp4
 "me.wojnowski" %% "oidc4s-testkit" % "x.y.z"
 ```
 
 There's also an aggregation layer exposing handy constructors:
 
 ```scala
-"me.wojnowski" %% "oidc4s-quick-sttp-circe" % "x.y.z"
+"me.wojnowski" %% "oidc4s-quick-sttp-circe" % "x.y.z" // sttp3
+"me.wojnowski" %% "oidc4s-quick-sttp4-circe" % "x.y.z" // sttp4
 ```
 
 ## Testing

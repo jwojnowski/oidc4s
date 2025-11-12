@@ -30,7 +30,8 @@ lazy val Versions = new {
 
   val circe = "0.14.15"
 
-  val sttp = "4.0.13"
+  val sttp3 = "3.11.0"
+  val sttp4 = "4.0.13"
 
   val jwtScala = "9.4.4"
 
@@ -65,11 +66,21 @@ lazy val circe = (project in file("circe"))
   )
   .dependsOn(core % "compile->compile;test->test")
 
-lazy val sttp = (project in file("sttp"))
+lazy val sttp3 = (project in file("sttp3"))
   .settings(
     commonSettings ++ Seq(
       name := "oidc4s-sttp",
-      libraryDependencies += "com.softwaremill.sttp.client4" %% "core" % Versions.sttp
+      libraryDependencies += "com.softwaremill.sttp.client3" %% "core" % Versions.sttp3
+    )
+  )
+  .dependsOn(core % "compile->compile;test->test")
+
+lazy val sttp4 = (project in file("sttp4"))
+  .settings(
+    commonSettings ++ Seq(
+      name := "oidc4s-sttp4",
+      libraryDependencies += "com.softwaremill.sttp.client4" %% "core" % Versions.sttp4,
+      mimaPreviousArtifacts := Set()
     )
   )
   .dependsOn(core % "compile->compile;test->test")
@@ -85,13 +96,22 @@ lazy val testkit = (project in file("testkit"))
   )
   .dependsOn(core, circe % "test->compile")
 
-lazy val quickSttpCirce = (project in file("quick-sttp-circe"))
+lazy val quickSttp3Circe = (project in file("quick-sttp3-circe"))
   .settings(
     commonSettings ++ Seq(
       name := "oidc4s-quick-sttp-circe"
     )
   )
-  .dependsOn(core, circe, sttp)
+  .dependsOn(core, circe, sttp3)
+
+lazy val quickSttp4Circe = (project in file("quick-sttp4-circe"))
+  .settings(
+    commonSettings ++ Seq(
+      name := "oidc4s-quick-sttp4-circe",
+      mimaPreviousArtifacts := Set()
+    )
+  )
+  .dependsOn(core, circe, sttp4)
 
 lazy val root =
   tlCrossRootProject
@@ -99,7 +119,9 @@ lazy val root =
     .aggregate(
       core,
       circe,
-      sttp,
-      quickSttpCirce,
+      sttp3,
+      sttp4,
+      quickSttp3Circe,
+      quickSttp4Circe,
       testkit
     )
