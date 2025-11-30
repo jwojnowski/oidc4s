@@ -79,11 +79,11 @@ jobs:
 
       - name: Make target directories
         if: github.event_name != 'pull_request' && (startsWith(github.ref, 'refs/tags/v'))
-        run: mkdir -p sttp3/target sttp4/target quick-sttp4-circe/target quick-sttp3-circe/target circe/target core/target testkit/target project/target
+        run: mkdir -p quick-sttp4-zio-json/target sttp3/target zio-json/target sttp4/target quick-sttp4-circe/target quick-sttp3-circe/target quick-sttp3-zio-json/target circe/target core/target testkit/target project/target
 
       - name: Compress target directories
         if: github.event_name != 'pull_request' && (startsWith(github.ref, 'refs/tags/v'))
-        run: tar cf targets.tar sttp3/target sttp4/target quick-sttp4-circe/target quick-sttp3-circe/target circe/target core/target testkit/target project/target
+        run: tar cf targets.tar quick-sttp4-zio-json/target sttp3/target zio-json/target sttp4/target quick-sttp4-circe/target quick-sttp3-circe/target quick-sttp3-zio-json/target circe/target core/target testkit/target project/target
 
       - name: Upload target directories
         if: github.event_name != 'pull_request' && (startsWith(github.ref, 'refs/tags/v'))
