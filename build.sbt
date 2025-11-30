@@ -1,6 +1,8 @@
 val Scala213 = "2.13.18"
 val Scala3 = "3.7.4"
 
+Global / onChangedBuildSource := ReloadOnSourceChanges
+
 ThisBuild / tlBaseVersion := "0.13"
 
 ThisBuild / scalaVersion := Scala213
@@ -29,6 +31,7 @@ lazy val Versions = new {
   }
 
   val circe = "0.14.15"
+  val zioJson = "0.7.45"
 
   val sttp3 = "3.11.0"
   val sttp4 = "4.0.13"
@@ -62,6 +65,22 @@ lazy val circe = (project in file("circe"))
       libraryDependencies += "io.circe" %% "circe-core" % Versions.circe,
       libraryDependencies += "io.circe" %% "circe-parser" % Versions.circe,
       libraryDependencies += "org.typelevel" %% "jawn-parser" % "1.6.0" // CVE-2022-21653
+    )
+  )
+  .dependsOn(core % "compile->compile;test->test")
+
+lazy val zioJson = (project in file("zio-json"))
+  .settings(
+    commonSettings ++ Seq(
+      name := "oidc4s-zio-json",
+      libraryDependencies += "dev.zio" %% "zio-json" % Versions.zioJson,
+      libraryDependencies ++= {
+        if (scalaVersion.value.startsWith("2."))
+          Seq("dev.zio" %% "zio-json-macros" % Versions.zioJson)
+        else
+          Seq.empty
+      },
+      mimaPreviousArtifacts := Set()
     )
   )
   .dependsOn(core % "compile->compile;test->test")
@@ -104,6 +123,15 @@ lazy val quickSttp3Circe = (project in file("quick-sttp3-circe"))
   )
   .dependsOn(core, circe, sttp3)
 
+lazy val quickSttp3ZioJson = (project in file("quick-sttp3-zio-json"))
+  .settings(
+    commonSettings ++ Seq(
+      name := "oidc4s-quick-sttp-zio-json",
+      mimaPreviousArtifacts := Set()
+    )
+  )
+  .dependsOn(core, zioJson, sttp3)
+
 lazy val quickSttp4Circe = (project in file("quick-sttp4-circe"))
   .settings(
     commonSettings ++ Seq(
@@ -113,15 +141,27 @@ lazy val quickSttp4Circe = (project in file("quick-sttp4-circe"))
   )
   .dependsOn(core, circe, sttp4)
 
+lazy val quickSttp4ZioJson = (project in file("quick-sttp4-zio-json"))
+  .settings(
+    commonSettings ++ Seq(
+      name := "oidc4s-quick-sttp4-zio-json",
+      mimaPreviousArtifacts := Set()
+    )
+  )
+  .dependsOn(core, zioJson, sttp4)
+
 lazy val root =
   tlCrossRootProject
     .settings(name := "oidc4s")
     .aggregate(
       core,
       circe,
+      zioJson,
       sttp3,
       sttp4,
       quickSttp3Circe,
+      quickSttp3ZioJson,
       quickSttp4Circe,
+      quickSttp4ZioJson,
       testkit
     )
