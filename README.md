@@ -20,7 +20,9 @@ To use this library with default Sttp/Circe implementations, add the following d
 "me.wojnowski" %% "oidc4s-quick-sttp4-circe" % "x.y.z"
 ```
 
-If you need to use Sttp3, use `oidc4s-quick-sttp-circe` instead.
+If you prefer zio-json over Circe, use `oidc4s-quick-sttp4-zio-json` instead.
+
+For Sttp3, use `oidc4s-quick-sttp-circe` or `oidc4s-quick-sttp-zio-json`.
 
 ### Creating `IdTokenVerifier` instance
 
@@ -117,7 +119,19 @@ val verifier: IdTokenVerifier[F] = ...
 val rawToken: String = ...
 
 val result: F[Either[IdTokenVerifier.Error, CustomData]] = verifier.verifyAndDecodeCustom[CustomData](rawToken)
+```
 
+#### zio-json Example
+```scala
+case class CustomData(email: String, isAdmin: Boolean)
+implicit val decoder: zio.json.JsonDecoder[CustomData] = zio.json.DeriveJsonDecoder.gen[CustomData]
+
+import ZioJsonSupport._ // brings ClaimsDecoder[A: JsonDecoder] instance into scope
+
+val verifier: IdTokenVerifier[F] = ...
+val rawToken: String = ...
+
+val result: F[Either[IdTokenVerifier.Error, CustomData]] = verifier.verifyAndDecodeCustom[CustomData](rawToken)
 ```
 
 
@@ -143,17 +157,15 @@ of JSON decoding and HTTP layer. These are implemented in their own modules, and
 if needed.
 
 Thus, `oidc4s-core` module defines `Transport` and `JsonSupport` abstractions. Currently, `JsonSupport`
-is implemented with [Circe](https://github.com/circe/circe) and `Transport`
+is implemented with [Circe](https://github.com/circe/circe) and [zio-json](https://github.com/zio/zio-json), and `Transport`
 with [sttp](https://github.com/softwaremill/sttp), which can be heavily customised on its own.
-
-There are plans to add integrations with ZIO (facades and layers for ease of use) and `zio-json`
-as `JsonSupport`.
 
 Currently available modules:
 
 ```scala
 "me.wojnowski" %% "oidc4s-core" % "x.y.z"
 "me.wojnowski" %% "oidc4s-circe" % "x.y.z"
+"me.wojnowski" %% "oidc4s-zio-json" % "x.y.z"
 "me.wojnowski" %% "oidc4s-sttp" % "x.y.z"  // sttp3
 "me.wojnowski" %% "oidc4s-sttp4" % "x.y.z" // sttp4
 "me.wojnowski" %% "oidc4s-testkit" % "x.y.z"
@@ -162,8 +174,10 @@ Currently available modules:
 There's also an aggregation layer exposing handy constructors:
 
 ```scala
-"me.wojnowski" %% "oidc4s-quick-sttp-circe" % "x.y.z" // sttp3
-"me.wojnowski" %% "oidc4s-quick-sttp4-circe" % "x.y.z" // sttp4
+"me.wojnowski" %% "oidc4s-quick-sttp-circe" % "x.y.z"    // sttp3 + circe
+"me.wojnowski" %% "oidc4s-quick-sttp-zio-json" % "x.y.z" // sttp3 + zio-json
+"me.wojnowski" %% "oidc4s-quick-sttp4-circe" % "x.y.z"   // sttp4 + circe
+"me.wojnowski" %% "oidc4s-quick-sttp4-zio-json" % "x.y.z" // sttp4 + zio-json
 ```
 
 ## Testing
