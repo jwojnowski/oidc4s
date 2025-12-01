@@ -1,4 +1,4 @@
-package me.wojnowski.oidc4s.json.circe
+package me.wojnowski.oidc4s.json.ziojson
 
 import me.wojnowski.oidc4s.IdTokenClaims
 import me.wojnowski.oidc4s.IdTokenClaims._
@@ -11,16 +11,17 @@ import cats.data.NonEmptySet
 
 import java.time.Instant
 
-import io.circe.Decoder
+import zio.json.DeriveJsonDecoder
+import zio.json.JsonDecoder
 
-class IdTokenClaimsCirceJsonSupportTest extends IdTokenClaimsJsonSupportTest {
-  override def jsonSupport: JsonSupport = CirceJsonSupport
+class IdTokenClaimsZioJsonSupportTest extends IdTokenClaimsJsonSupportTest {
+  override def jsonSupport: JsonSupport = ZioJsonSupport
 
   test("Custom claims (with Issuer) decoding") {
-    import CirceJsonSupport._
+    import ZioJsonSupport._
 
     case class CustomClaims(foo: String, bar: Int)
-    implicit val decoder: Decoder[CustomClaims] = Decoder.forProduct2[CustomClaims, String, Int]("foo", "bar")(CustomClaims.apply)
+    implicit val decoder: JsonDecoder[CustomClaims] = DeriveJsonDecoder.gen[CustomClaims]
 
     val rawJson =
       """{"foo": "Foo", "bar": 12, "additionalField": "doesn't matter", "iss": "https://example.com", "sub": "a-subject", "aud": "audience", "exp": 3, "iat": 0}"""
