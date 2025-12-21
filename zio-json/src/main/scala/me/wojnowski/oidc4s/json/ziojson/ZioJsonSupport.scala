@@ -32,10 +32,9 @@ trait ZioJsonSupport
 
   private implicit def customAndIdTokenClaimsDecoder[A: zio.json.JsonDecoder]: zio.json.JsonDecoder[(A, IdTokenClaims)] =
     zio.json.JsonDecoder[Json].mapOrFail { json =>
-      val jsonStr = json.toString
       for {
-        a      <- zio.json.JsonDecoder[A].decodeJson(jsonStr)
-        claims <- zio.json.JsonDecoder[IdTokenClaims].decodeJson(jsonStr)
+        a      <- json.as[A].left.map(error => s"Could not decode custom claims: $error")
+        claims <- json.as[IdTokenClaims].left.map(error => s"Could not decode IdTokenClaims: $error")
       } yield (a, claims)
     }
 
