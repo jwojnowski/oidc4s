@@ -1,8 +1,6 @@
 val Scala213 = "2.13.18"
 val Scala3 = "3.7.4"
 
-Global / onChangedBuildSource := ReloadOnSourceChanges
-
 ThisBuild / tlBaseVersion := "0.13"
 
 ThisBuild / scalaVersion := Scala213
@@ -31,7 +29,7 @@ lazy val Versions = new {
   }
 
   val circe = "0.14.15"
-  val zioJson = "0.7.45"
+  val zioJson = "0.8.0"
 
   val sttp3 = "3.11.0"
   val sttp4 = "4.0.13"
