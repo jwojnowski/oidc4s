@@ -13,6 +13,7 @@ ThisBuild / developers := List(
 )
 
 ThisBuild / tlCiReleaseBranches := Seq()
+ThisBuild / tlJdkRelease := Some(21)
 ThisBuild / tlCiHeaderCheck := false
 ThisBuild / tlCiScalafixCheck := true
 ThisBuild / githubWorkflowJavaVersions := Seq(JavaSpec.temurin("21"))
