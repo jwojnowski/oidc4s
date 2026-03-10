@@ -52,7 +52,7 @@ lazy val core = (project in file("core")).settings(
     libraryDependencies += "org.typelevel" %% "munit-cats-effect" % Versions.mUnitCatsEffect % Test,
     libraryDependencies += "org.typelevel" %% "cats-effect-testkit" % Versions.cats.effect % Test,
     libraryDependencies += "org.scalameta" %% "munit-scalacheck" % Versions.mUnitScalacheck % Test,
-    libraryDependencies += "org.typelevel" %% "scalacheck-effect-munit" % "2.0.0-M2" % Test,
+    libraryDependencies += "org.typelevel" %% "scalacheck-effect-munit" % "2.1.0" % Test,
     libraryDependencies += "com.github.jwt-scala" %% "jwt-core" % "11.0.3" % Test
   )
 )
