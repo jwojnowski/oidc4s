@@ -38,7 +38,7 @@ lazy val Versions = new {
   val jwtScala = "9.4.4"
 
   val mUnit = "1.2.4"
-  val mUnitCatsEffect = "2.1.0"
+  val mUnitCatsEffect = "2.2.0"
   val mUnitScalacheck = "1.2.0"
 
 }
