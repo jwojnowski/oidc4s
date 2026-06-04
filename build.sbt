@@ -33,7 +33,7 @@ lazy val Versions = new {
   val zioJson = "0.9.2"
 
   val sttp3 = "3.11.0"
-  val sttp4 = "4.0.23"
+  val sttp4 = "4.0.24"
 
   val jwtScala = "9.4.4"
 
