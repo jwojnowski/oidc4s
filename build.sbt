@@ -63,7 +63,7 @@ lazy val circe = (project in file("circe"))
       name := "oidc4s-circe",
       libraryDependencies += "io.circe" %% "circe-core" % Versions.circe,
       libraryDependencies += "io.circe" %% "circe-parser" % Versions.circe,
-      libraryDependencies += "org.typelevel" %% "jawn-parser" % "1.6.0" // CVE-2022-21653
+      libraryDependencies += "org.typelevel" %% "jawn-parser" % "1.7.0" // CVE-2022-21653
     )
   )
   .dependsOn(core % "compile->compile;test->test")
