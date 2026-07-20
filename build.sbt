@@ -29,7 +29,7 @@ lazy val Versions = new {
     val effect = "3.7.0"
   }
 
-  val circe = "0.14.15"
+  val circe = "0.14.16"
   val zioJson = "0.9.2"
 
   val sttp3 = "3.11.0"
