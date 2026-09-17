@@ -29,7 +29,7 @@ lazy val Versions = new {
     val effect = "3.7.0"
   }
 
-  val circe = "0.14.15"
+  val circe = "0.14.16"
   val zioJson = "0.9.2"
 
   val sttp3 = "3.11.0"
@@ -63,7 +63,7 @@ lazy val circe = (project in file("circe"))
       name := "oidc4s-circe",
       libraryDependencies += "io.circe" %% "circe-core" % Versions.circe,
       libraryDependencies += "io.circe" %% "circe-parser" % Versions.circe,
-      libraryDependencies += "org.typelevel" %% "jawn-parser" % "1.6.0" // CVE-2022-21653
+      libraryDependencies += "org.typelevel" %% "jawn-parser" % "1.7.0" // CVE-2022-21653
     )
   )
   .dependsOn(core % "compile->compile;test->test")
